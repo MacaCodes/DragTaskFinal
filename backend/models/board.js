@@ -3,14 +3,10 @@ const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
 const boardSchema = new Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  icon: {
+  boardId: {
     type: String,
-    default: '📃'
+    required: true,
+    unique: true
   },
   title: {
     type: String,
@@ -18,9 +14,7 @@ const boardSchema = new Schema({
   },
   description: {
     type: String,
-    default: `Add description here
-    🟢 You can add multiline description
-    🟢 Let's start...`
+    default: `🟢 Add description here`
   },
   position: {
     type: Number
@@ -37,15 +31,13 @@ const boardSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  columns: [{
+  lists: [{
     type: Schema.Types.ObjectId,
-    ref: 'Column'
+    ref: 'List' 
   }]
-}, {
-  timestamps: {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-}
-}, schemaOptions)
+}, { collection: 'boards' }, schemaOptions)
 
-module.exports = mongoose.model('Board', boardSchema)
+const Board = mongoose.model('Board', boardSchema);
+
+module.exports = Board;
+
