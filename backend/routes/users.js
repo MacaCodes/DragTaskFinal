@@ -7,3 +7,5 @@ router.get('/', function(req, res, next) {
 });
 
 module.exports = router;
+
+// this is from npx express-generator 
