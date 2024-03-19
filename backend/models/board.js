@@ -1,13 +1,7 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const boardSchema = new Schema({
-  boardId: {
-    type: String,
-    required: true,
-    unique: true
-  },
+const boardSchema = new mongoose.Schema({
   title: {
     type: String,
     default: 'Untitled'
