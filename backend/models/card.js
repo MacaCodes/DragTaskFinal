@@ -1,10 +1,9 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const cardSchema = new Schema({
+const cardSchema = new mongoose.Schema({
   listId: {
-    type: Schema.Types.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     ref: 'List',
     required: true
   },
@@ -17,14 +16,14 @@ const cardSchema = new Schema({
     default: ''
   },
   position: {
-    type: Number
+    type: Number,
+    default: false
   },
   comments: [
     {
       text: {
         type: String,
-        required: true,
-      },
+        default: ''},
       createdAt: {
         type: Date,
         default: Date.now,

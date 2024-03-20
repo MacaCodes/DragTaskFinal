@@ -34,6 +34,15 @@ exports.getAll = async (req, res) => {
     }
 };
 
+exports.getAll = async (req, res) => {
+    try {
+        const boards = await Board.find().populate('lists');
+        res.status(200).json(boards);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
+}
 exports.getOne = async (req, res) => {
     try {
         const { boardId } = req.params;
@@ -48,7 +57,7 @@ exports.getOne = async (req, res) => {
     }
 };
 
-exports.update = async (req, res) => {
+exports.updatePosition = async (req, res) => {
     try {
         const { boardId } = req.params;
         const { title, description } = req.body;
