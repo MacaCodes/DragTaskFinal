@@ -1,8 +1,7 @@
 const router = require('express').Router({ mergeParams: true });
 const { param, body } = require('express-validator');
-const tokenHandler = require('../handlers/tokenHandler');
 const validation = require('../handlers/validation');
-const cardController = require('../controllers/card');
+const cardController = require('../controllers/cardController');
 
 router.post(
     '/',
@@ -15,7 +14,6 @@ router.post(
     }),
     body('title').notEmpty().withMessage('Title is required'),
     validation.validate,
-    tokenHandler.verifyToken,
     cardController.create
 );
 
@@ -36,7 +34,6 @@ router.get(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     cardController.getOne
 );
 
@@ -57,7 +54,6 @@ router.put(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     cardController.update
 );
 
@@ -78,7 +74,6 @@ router.delete(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     cardController.delete
 );
 
@@ -92,7 +87,6 @@ router.put(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     cardController.updatePositions
 );
 

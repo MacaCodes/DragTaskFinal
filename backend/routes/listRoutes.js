@@ -1,7 +1,6 @@
 const router = require('express').Router({ mergeParams: true });
 const { param } = require('express-validator');
-const tokenHandler = require('../handlers/tokenHandler');
-const listController = require('../controllers/list');
+const listController = require('../controllers/listController');
 const validation = require('../handlers/validation');
 
 router.post(
@@ -14,7 +13,6 @@ router.post(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     listController.create
 );
 
@@ -28,7 +26,6 @@ router.get(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     listController.getAll
 );
 
@@ -49,7 +46,6 @@ router.get(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     listController.getOne
 );
 
@@ -70,7 +66,6 @@ router.put(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     listController.update
 );
 
@@ -91,7 +86,6 @@ router.delete(
         }
     }),
     validation.validate,
-    tokenHandler.verifyToken,
     listController.delete
 );
 

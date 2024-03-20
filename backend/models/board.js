@@ -1,8 +1,7 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const boardSchema = new Schema({
+const boardSchema = new mongoose.Schema({
   icon: {
     type: String,
     default: '📃'
@@ -32,9 +31,9 @@ const boardSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  columns: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Column'
+  lists: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'List'
   }]
 }, {
   timestamps: {

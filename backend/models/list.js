@@ -1,17 +1,15 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const listSchema = new Schema({
+const listSchema = new mongoose.Schema({
     boardId: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Board',
-        required: true
     },
-    cardId:{
-        type: schemaOptions.Types.ObjectId,
-        ref: 'Card',
-    },
+    // cardId:{
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Card',
+    // },
     title: {
         type: String,
         default: ''
@@ -26,5 +24,6 @@ const listSchema = new Schema({
     },
 }, schemaOptions)
 
-module.exports = mongoose.model('List', columnSchema)
+
+module.exports = mongoose.model('List', listSchema)
 
