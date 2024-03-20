@@ -3,9 +3,9 @@ const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
 const cardSchema = new Schema({
-  columnId: {
+  listId: {
     type: Schema.Types.ObjectId,
-    ref: 'Column',
+    ref: 'List',
     required: true
   },
   title: {
@@ -19,6 +19,19 @@ const cardSchema = new Schema({
   position: {
     type: Number
   },
+  comments: [
+    {
+      text: {
+        type: String,
+        required: true,
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
+
   createdAt: {
     type:Date,
     default: Date.now,

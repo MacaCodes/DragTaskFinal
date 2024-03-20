@@ -3,11 +3,6 @@ const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
 const boardSchema = new Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
   icon: {
     type: String,
     default: '📃'
