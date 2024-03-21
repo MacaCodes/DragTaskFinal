@@ -1,41 +1,28 @@
-const express = require('express');
-const path = require('path');
-const cookieParser = require('cookie-parser');
-const logger = require('morgan');
-const cors = require('cors');
+
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var logger = require('morgan');
 require('dotenv').config();
 
 // Import connectDB from your database configuration file
 const connectDB = require('./config/database');
 
+var indexRouter = require('./routes/index');
+var usersRouter = require('./routes/users');
 
-const boardsRouter = require('./routes/boardRoutes');
-const cardsRouter = require('./routes/cardRoutes');
-const listsRouter = require('./routes/listRoutes');
-
-const app = express();
-console.log('express app created');
+var app = express();
 
 // Call connectDB to initiate the database connection
 connectDB();
-console.log('Database connected');
-app.use(cors());
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/api/boards', boardsRouter);
-app.use('/api/lists', listsRouter);
-app.use('/api/cards', cardsRouter);
-
-// Define route for /ws
-console.log('Defining /ws route');
-app.get('/ws', function(req, res) {
-  console.log('Handling /ws request');
-  res.send('WS endpoint response');
-});
-console.log('/ws route defined');
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
 
 module.exports = app;
