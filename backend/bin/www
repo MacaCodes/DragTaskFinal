@@ -8,11 +8,14 @@ const app = require('../app');
 const debug = require('debug')('server:server');
 const http = require('http');
 const dotenv = require('dotenv'); 
+const cors = require('cors');
+const mongoose = require('mongoose');
 
 dotenv.config();
 /**
  * Get port from environment and store in Express.
  */
+app.use(cors());
 
 const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
@@ -28,11 +31,18 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-  
+  mongoose.connect(process.env.MONGODB_URL).then (() => {
+    server.listen(port);
+    server.on('error', onError);
+  server.on('listening', onListening);
+  console.log('mongodb connected' + process.env.MONGODB_URL);
+  }).catch(err => {
+    console.log(err);
+    process.exit(1);
+  });
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+
+
 
 /**
  * Normalize a port into a number, string, or false.

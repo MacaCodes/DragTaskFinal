@@ -26,7 +26,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('api/v1' , require('./routes'));
+app.use('/api/boards', boardsRouter);
+app.use('/api/lists', listsRouter);
+app.use('/api/cards', cardsRouter);
 
 // Define route for /ws
 console.log('Defining /ws route');
