@@ -8,12 +8,15 @@ const app = require('../app');
 const debug = require('debug')('server:server');
 const http = require('http');
 const dotenv = require('dotenv'); 
+const cors = require('cors');
+const mongoose = require('mongoose');
 const express = require ('express');
 
 dotenv.config();
 /**
  * Get port from environment and store in Express.
  */
+app.use(cors());
 
 const port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
@@ -40,6 +43,7 @@ console.log(`mongodb connected ${process.env.MONGODB_URL}`)
   console.log(err);
   process.exit(1);
 });
+
 
 /**
  * Normalize a port into a number, string, or false.

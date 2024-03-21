@@ -5,7 +5,7 @@ const boardController = require('../controllers/boardController');
 
 router.post(
     '/',
-    boardController.create
+    boardController.createBoard
 );
 
 router.get(

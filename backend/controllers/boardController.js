@@ -3,7 +3,7 @@ const Board = require('../models/board');
 const List = require('../models/list');
 const Card = require('../models/card');
 
-exports.create = async (req, res) => {
+exports.createBoard = async (req, res) => {
     try {
         const { title, description } = req.body;
         // Validate required fields
