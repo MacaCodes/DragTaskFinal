@@ -1,6 +1,5 @@
 const List = require('../models/list');
 const Card = require('../models/card');
-
 exports.create = async (req, res) => {
     const { boardId } = req.params;
     const { title } = req.body;

@@ -6,10 +6,10 @@ const listSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Board',
     },
-    // cardId:{
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Card',
-    // },
+    cardId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Card',
+    },
     title: {
         type: String,
         default: ''
@@ -23,7 +23,6 @@ const listSchema = new mongoose.Schema({
         default: Date.now,
     },
 }, schemaOptions)
+const List = mongoose.model('List', listSchema);
 
-
-module.exports = mongoose.model('List', listSchema)
-
+module.exports = List;

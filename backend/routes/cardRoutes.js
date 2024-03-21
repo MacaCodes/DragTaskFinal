@@ -4,7 +4,7 @@ const validation = require('../handlers/validation');
 const cardController = require('../controllers/cardController');
 
 router.post(
-    '/',
+    '/boards/:boardId/lists/:listId/cards',
     param('listId').custom(value => {
         if (!validation.isObjectId(value)) {
             return Promise.reject('Invalid list ID');
@@ -18,7 +18,7 @@ router.post(
 );
 
 router.get(
-    '/:cardId',
+    '/boards/:boardId/lists/:listId/cards/:cardId',
     param('listId').custom(value => {
         if (!validation.isObjectId(value)) {
             return Promise.reject('Invalid list ID');
@@ -38,7 +38,7 @@ router.get(
 );
 
 router.put(
-    '/:cardId',
+    '/boards/:boardId/lists/:listId/cards/:cardId',
     param('listId').custom(value => {
         if (!validation.isObjectId(value)) {
             return Promise.reject('Invalid list ID');
@@ -58,7 +58,7 @@ router.put(
 );
 
 router.delete(
-    '/:cardId',
+    '/boards/:boardId/lists/:listId/cards/:cardId',
     param('listId').custom(value => {
         if (!validation.isObjectId(value)) {
             return Promise.reject('Invalid list ID');
@@ -78,7 +78,7 @@ router.delete(
 );
 
 router.put(
-    '/positions',
+    '/boards/:boardId/lists/:listId/cards/positions',
     param('listId').custom(value => {
         if (!validation.isObjectId(value)) {
             return Promise.reject('Invalid list ID');
@@ -90,4 +90,7 @@ router.put(
     cardController.updatePositions
 );
 
+router.patch('/:cardId/move', cardController.moveCardToList);
+
 module.exports = router;
+
