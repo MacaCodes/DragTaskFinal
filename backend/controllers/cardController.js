@@ -1,8 +1,30 @@
 const Card = require('../models/card');
 const List = require('../models/list');
-
+// exports.create = async (req, res) => {
+//     console.log('Creating a new card');
+//     const { listId } = req.body;
+//     console.log('List id:', listId);
+//     try {
+//         const list = await List.findById(listId);
+//         console.log('List found:', list);
+//         const cardsCount = await Card.find({ list: listId }).count();
+//         console.log('Cards count:', cardsCount);
+//         const card = await Card.create({
+//             list: listId,
+//             position: cardsCount > 0 ? cardsCount : 0
+//         });
+//         console.log('Card created:', card);
+//         card._doc.list = list;
+//         console.log('Card data:', card._doc);
+//         res.status(201).json(card);
+//     } catch (err) {
+//         console.error(err);
+//         console.log('Error creating card');
+//         res.status(500).json(err);
+//     }
+// };
 exports.create = async (req, res) => {
-    const { listId } = req.params;
+    const { listId } = req.params; // Use req.params instead of req.body
     const { title, content } = req.body;
 
     try {
@@ -11,13 +33,14 @@ exports.create = async (req, res) => {
             return res.status(404).json({ error: 'List not found' });
         }
 
+        // Assuming `position` calculation is needed or another logic specific to your application
         const position = await Card.countDocuments({ listId });
 
         const card = await Card.create({
             title,
             content,
             listId,
-            position
+            position // Ensure this aligns with your schema and requirements
         });
 
         res.status(201).json(card);
@@ -27,17 +50,22 @@ exports.create = async (req, res) => {
     }
 };
 
+
 exports.getOne = async (req, res) => {
     const { cardId } = req.params;
 
     try {
+        console.log('Fetching card', cardId);
         const card = await Card.findById(cardId);
         if (!card) {
+            console.log('Card not found');
             return res.status(404).json({ error: 'Card not found' });
         }
+        console.log('Fetched card successfully', card);
         res.status(200).json(card);
     } catch (err) {
         console.error(err);
+        console.log('Error fetching card');
         res.status(500).json({ error: 'Server error' });
     }
 };
@@ -47,17 +75,21 @@ exports.update = async (req, res) => {
     const { title, description } = req.body;
 
     try {
+        console.log('Updating card', cardId);
         const card = await Card.findByIdAndUpdate(
             cardId,
             { title, description },
             { new: true }
         );
         if (!card) {
+            console.log('Card not found');
             return res.status(404).json({ error: 'Card not found' });
         }
+        console.log('Updated card successfully', card);
         res.status(200).json(card);
     } catch (err) {
         console.error(err);
+        console.log('Error updating card');
         res.status(500).json({ error: 'Server error' });
     }
 };
