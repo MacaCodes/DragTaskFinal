@@ -8,6 +8,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import boardApi from '../api/boardApi'
 import EmojiPicker from '../components/common/EmojiPicker'
 import { setBoards } from '../redux/features/boardSlice'
+import Kanban from '../components/common/Kanban'
+
 
 let timer
 const timeout = 500
