@@ -42,4 +42,7 @@ const boardSchema = new mongoose.Schema({
 }
 }, schemaOptions)
 
-module.exports = mongoose.model('Board', boardSchema)
+const Board = mongoose.model('Board', boardSchema);
+
+module.exports = Board;
+
