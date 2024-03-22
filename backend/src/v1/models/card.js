@@ -2,10 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const taskSchema = new Schema({
-  list: {
+const cardSchema = new Schema({
+  section: {
     type: Schema.Types.ObjectId,
-    ref: 'List',
+    ref: 'Section',
     required: true
   },
   title: {
@@ -21,4 +21,5 @@ const taskSchema = new Schema({
   }
 }, schemaOptions)
 
-module.exports = mongoose.model('Card', taskSchema)
+module.exports = mongoose.model('Card', cardSchema)
+

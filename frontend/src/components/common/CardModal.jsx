@@ -2,7 +2,11 @@ import { Backdrop, Fade, IconButton, Modal, Box, TextField, Typography, Divider 
 import React, { useEffect, useRef, useState } from 'react'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
 import Moment from 'moment'
-import card from '../../api/card'
+import { CKEditor } from '@ckeditor/ckeditor5-react'
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
+import cardApi from '../../api/cardApi'
+
+import '../../css/custom-editor.css'
 
 const modalStyle = {
   outline: 'none',
@@ -22,42 +26,44 @@ let timer
 const timeout = 500
 let isModalClosed = false
 
-const TaskModal = props => {
+const CardModal = props => {
   const boardId = props.boardId
-  const [task, setTask] = useState(props.task)
+  const [card, setCard] = useState(props.card)
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const editorWrapperRef = useRef()
 
   useEffect(() => {
-    setTask(props.task)
-    setTitle(props.task !== undefined ? props.task.title : '')
-    setContent(props.task !== undefined ? props.task.content : '')
-    if (props.task !== undefined) {
+    setCard(props.card)
+    setTitle(props.card !== undefined ? props.card.title : '')
+    setContent(props.card !== undefined ? props.card.content : '')
+    if (props.card !== undefined) {
       isModalClosed = false
+
+      updateEditorHeight()
     }
-  }, [props.task])
+  }, [props.card])
 
   const updateEditorHeight = () => {
     setTimeout(() => {
       if (editorWrapperRef.current) {
         const box = editorWrapperRef.current
-        box.querySelector('.editor-content').style.height = (box.offsetHeight - 50) + 'px'
+        box.querySelector('.ck-editor__editable_inline').style.height = (box.offsetHeight - 50) + 'px'
       }
     }, timeout)
   }
 
   const onClose = () => {
     isModalClosed = true
-    props.onUpdate(task)
+    props.onUpdate(card)
     props.onClose()
   }
 
-  const deleteTask = async () => {
+  const deleteCard = async () => {
     try {
-      await card.delete(boardId, task.id)
-      props.onDelete(task)
-      setTask(undefined)
+      await cardApi.delete(boardId, card.id)
+      props.onDelete(card)
+      setCard(undefined)
     } catch (err) {
       alert(err)
     }
@@ -68,47 +74,47 @@ const TaskModal = props => {
     const newTitle = e.target.value
     timer = setTimeout(async () => {
       try {
-        await card.update(boardId, task.id, { title: newTitle })
+        await cardApi.update(boardId, card.id, { title: newTitle })
       } catch (err) {
         alert(err)
       }
     }, timeout)
 
-    task.title = newTitle
+    card.title = newTitle
     setTitle(newTitle)
-    props.onUpdate(task)
+    props.onUpdate(card)
   }
 
-  const updateContent = async (e) => {
+  const updateContent = async (event, editor) => {
     clearTimeout(timer)
-    const data = e.target.value
+    const data = editor.getData()
 
     console.log({ isModalClosed })
 
     if (!isModalClosed) {
       timer = setTimeout(async () => {
         try {
-          await card.update(boardId, task.id, { content: data })
+          await cardApi.update(boardId, card.id, { content: data })
         } catch (err) {
           alert(err)
         }
       }, timeout);
 
-      task.content = data
+      card.content = data
       setContent(data)
-      props.onUpdate(task)
+      props.onUpdate(card)
     }
   }
 
   return (
     <Modal
-      open={task !== undefined}
+      open={card !== undefined}
       onClose={onClose}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
     >
-      <Fade in={task !== undefined}>
+      <Fade in={card !== undefined}>
         <Box sx={modalStyle}>
           <Box sx={{
             display: 'flex',
@@ -116,7 +122,7 @@ const TaskModal = props => {
             justifyContent: 'flex-end',
             width: '100%'
           }}>
-            <IconButton variant='outlined' color='error' onClick={deleteTask}>
+            <IconButton variant='outlined' color='error' onClick={deleteCard}>
               <DeleteOutlinedIcon />
             </IconButton>
           </Box>
@@ -141,7 +147,7 @@ const TaskModal = props => {
               }}
             />
             <Typography variant='body2' fontWeight='700'>
-              {task !== undefined ? Moment(task.createdAt).format('YYYY-MM-DD') : ''}
+              {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
             </Typography>
             <Divider sx={{ margin: '1.5rem 0' }} />
             <Box
@@ -153,15 +159,12 @@ const TaskModal = props => {
                 overflowY: 'auto'
               }}
             >
-              <TextField
-                value={content}
+              <CKEditor
+                editor={ClassicEditor}
+                data={content}
                 onChange={updateContent}
-                placeholder='Add content'
-                variant='outlined'
-                multiline
-                fullWidth
-                rows={10}
-                sx={{ marginBottom: '10px' }}
+                onFocus={updateEditorHeight}
+                onBlur={updateEditorHeight}
               />
             </Box>
           </Box>
@@ -171,4 +174,4 @@ const TaskModal = props => {
   )
 }
 
-export default TaskModal
+export default CardModal

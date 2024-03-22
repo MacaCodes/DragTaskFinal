@@ -64,6 +64,7 @@ exports.updatePosition = async (req, res) => {
           resourceListReverse[key].id,
           {
             $set: {
+              //resourceList or
               list: resourceListId,
               position: key
             }

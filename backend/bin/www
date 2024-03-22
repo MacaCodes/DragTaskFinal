@@ -7,18 +7,20 @@
 const app = require('../app');
 const debug = require('debug')('server:server');
 const http = require('http');
-const dotenv = require('dotenv'); 
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-const express = require ('express');
+const cors = require('cors');
 
 dotenv.config();
+
+
 /**
  * Get port from environment and store in Express.
  */
+app.use(cors());
 
-const port = normalizePort(process.env.PORT || '3001');
+const port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
-console.log('listening on port ' + port);
 
 /**
  * Create HTTP server.
@@ -30,17 +32,16 @@ const server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 
-  
 mongoose.connect(process.env.MONGODB_URL).then(() => {
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-console.log(`mongodb connected ${process.env.MONGODB_URL}`)
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+  console.log(`mongodb connected ${process.env.MONGODB_URL}`)
 }).catch(err => {
   console.log(err);
   process.exit(1);
 });
+console.log(`Server running on port ${port}`)
 
 
 /**

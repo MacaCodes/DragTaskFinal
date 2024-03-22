@@ -15,3 +15,4 @@ const listSchema = new Schema({
 }, schemaOptions)
 
 module.exports = mongoose.model('List', listSchema)
+

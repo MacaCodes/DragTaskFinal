@@ -2,22 +2,29 @@ const Board = require('../models/board')
 const List = require('../models/list')
 const Card = require('../models/card')
 
+// Example function definition for createBoard
 exports.create = async (req, res) => {
-  try {
-    const boardsCount = await Board.find().count()
-    const board = await Board.create({
-      user: req.user._id,
-      position: boardsCount > 0 ? boardsCount : 0
-    })
-    res.status(201).json(board)
-  } catch (err) {
-    res.status(500).json(err)
-  }
-}
+    try {
+        const boardsCount = await Board.find().count()
+        const board = new Board({
+          title: 'Untitled',
+          description: 'Add description here',
+          favourite: false,
+          favouritePosition: 0,
+          position: boardsCount > 0 ? boardsCount : 0
+        })
+        await board.save()
+        res.status(201).json(board)
+    } catch (err) {
+        res.status(500).json(err)
+    }
+};
+
+
 
 exports.getAll = async (req, res) => {
   try {
-    const boards = await Board.find({ user: req.user._id }).sort('-position')
+    const boards = await Board.find({})
     res.status(200).json(boards)
   } catch (err) {
     res.status(500).json(err)
@@ -43,7 +50,7 @@ exports.updatePosition = async (req, res) => {
 exports.getOne = async (req, res) => {
   const { boardId } = req.params
   try {
-    const board = await Board.findOne({ user: req.user._id, _id: boardId })
+    const board = await Board.findOne({ _id: boardId })
     if (!board) return res.status(404).json('Board not found')
     const lists = await List.find({ board: boardId })
     for (const list of lists) {
@@ -69,7 +76,7 @@ exports.update = async (req, res) => {
 
     if (favourite !== undefined && currentBoard.favourite !== favourite) {
       const favourites = await Board.find({
-        user: currentBoard.user,
+        currentBoard,
         favourite: true,
         _id: { $ne: boardId }
       }).sort('favouritePosition')
@@ -99,7 +106,6 @@ exports.update = async (req, res) => {
 exports.getFavourites = async (req, res) => {
   try {
     const favourites = await Board.find({
-      user: req.user._id,
       favourite: true
     }).sort('-favouritePosition')
     res.status(200).json(favourites)
@@ -137,7 +143,7 @@ exports.delete = async (req, res) => {
 
     if (currentBoard.favourite) {
       const favourites = await Board.find({
-        user: currentBoard.user,
+        currentBoard,
         favourite: true,
         _id: { $ne: boardId }
       }).sort('favouritePosition')
