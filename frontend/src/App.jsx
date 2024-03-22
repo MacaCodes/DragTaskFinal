@@ -22,6 +22,7 @@ function App() {
           <Route path='/' element={<AppLayout />}>
             <Route index element={<Home />} />
             <Route path='boards/:boardId' element={<Board />} />
+            
           </Route>
         </Routes>
       </BrowserRouter>
