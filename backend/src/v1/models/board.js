@@ -1,7 +1,14 @@
+
 const mongoose = require('mongoose')
+const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
-const boardSchema = new mongoose.Schema({
+const boardSchema = new Schema({
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   icon: {
     type: String,
     default: '📃'
@@ -19,30 +26,14 @@ const boardSchema = new mongoose.Schema({
   position: {
     type: Number
   },
-  priority: {
+  favourite: {
     type: Boolean,
     default: false
   },
-  priorityPosition: {
+  favouritePosition: {
     type: Number,
     default: 0
-  },  
-  createdAt: {
-    type: Date,
-    default: Date.now
-  },
-  lists: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'List'
-  }]
-}, {
-  timestamps: {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-}
+  }
 }, schemaOptions)
 
-const Board = mongoose.model('Board', boardSchema);
-
-module.exports = Board;
-
+module.exports = mongoose.model('Board', boardSchema)

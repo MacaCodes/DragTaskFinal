@@ -8,16 +8,14 @@ const app = require('../app');
 const debug = require('debug')('server:server');
 const http = require('http');
 const dotenv = require('dotenv'); 
-const cors = require('cors');
 const mongoose = require('mongoose');
 
 dotenv.config();
 /**
  * Get port from environment and store in Express.
  */
-app.use(cors());
 
-const port = normalizePort(process.env.PORT || '3000');
+const port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
 console.log('listening on port ' + port);
 
