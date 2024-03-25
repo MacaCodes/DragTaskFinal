@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "",
+  "main": "./bin/www.js",
   "scripts": {
     "dev": "nodemon ./bin/www",
     "start": "node ./bin/www",

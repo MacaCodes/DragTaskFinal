@@ -38,14 +38,14 @@ const TaskModal = props => {
     }
   }, [props.task])
 
-  const updateEditorHeight = () => {
-    setTimeout(() => {
-      if (editorWrapperRef.current) {
-        const box = editorWrapperRef.current
-        box.querySelector('.editor-content').style.height = (box.offsetHeight - 50) + 'px'
-      }
-    }, timeout)
-  }
+  // const updateEditorHeight = () => {
+  //   setTimeout(() => {
+  //     if (editorWrapperRef.current) {
+  //       const box = editorWrapperRef.current
+  //       box.querySelector('.editor-content').style.height = (box.offsetHeight - 50) + 'px'
+  //     }
+  //   }, timeout)
+  // }
 
   const onClose = () => {
     isModalClosed = true
