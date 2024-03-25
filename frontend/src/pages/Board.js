@@ -1,15 +1,11 @@
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import StarBorderOutlinedIcon from '@mui/icons-material/StarBorderOutlined'
-import StarOutlinedIcon from '@mui/icons-material/StarOutlined'
 import { Box, IconButton, TextField } from '@mui/material'
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
 import boardApi from '../api/boardApi'
-import EmojiPicker from '../components/common/EmojiPicker'
 import { setBoards } from '../redux/features/boardSlice'
 import Kanban from '../components/common/Kanban'
-
 
 let timer
 const timeout = 500
@@ -21,7 +17,6 @@ const Board = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [sections, setSections] = useState([])
-  const [isFavourite, setIsFavourite] = useState(false)
   const [icon, setIcon] = useState('')
 
   const boards = useSelector((state) => state.board.value)
@@ -33,7 +28,6 @@ const Board = () => {
         setTitle(res.title)
         setDescription(res.description)
         setSections(res.sections)
-        setIsFavourite(res.favourite)
         setIcon(res.icon)
       } catch (err) {
         alert(err)
@@ -89,15 +83,6 @@ const Board = () => {
     }, timeout);
   }
 
-  const addFavourite = async () => {
-    try {
-      await boardApi.update(boardId, { favourite: !isFavourite });
-      setIsFavourite(!isFavourite);
-    } catch (err) {
-      alert(err);
-    }
-  };
-
   const deleteBoard = async () => {
     try {
       await boardApi.delete(boardId)
@@ -121,23 +106,12 @@ const Board = () => {
         justifyContent: 'space-between',
         width: '100%'
       }}>
-        <IconButton variant='outlined' onClick={addFavourite}>
-          {
-            isFavourite ? (
-              <StarOutlinedIcon color='warning' />
-            ) : (
-              <StarBorderOutlinedIcon />
-            )
-          }
-        </IconButton>
         <IconButton variant='outlined' color='error' onClick={deleteBoard}>
           <DeleteOutlinedIcon />
         </IconButton>
       </Box>
       <Box sx={{ padding: '10px 50px' }}>
         <Box>
-          {/* emoji picker */}
-          <EmojiPicker icon={icon} onChange={onIconChange} />
           <TextField
             value={title}
             onChange={updateTitle}
@@ -165,7 +139,6 @@ const Board = () => {
           />
         </Box>
         <Box>
-          {/* Kanban board */}
           <Kanban data={sections} boardId={boardId} />
         </Box>
       </Box>
