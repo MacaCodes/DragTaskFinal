@@ -1,90 +1,88 @@
 const Board = require('../models/Board');
+const List = require('../models/list');
+const Card = require('../models/card');
 
 exports.create = async (req, res) => {
   try {
-    const boardsCount = await Board.find().count();
+    const { title, description } = req.body;
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const boardsCount = await Board.countDocuments({});
     const board = await Board.create({
-      position: boardsCount > 0 ? boardsCount : 0
+      title,
+      description: description || '',
+      position: boardsCount,
     });
     res.status(201).json(board);
   } catch (err) {
     console.error(err);
-    res.status(500).json(err);
+    res.status(500).json({ error: 'Error creating board' });
   }
 };
+
 
 exports.getAll = async (req, res) => {
   try {
-      const boardsCount = await Board.countDocuments();
-      const board = new Board({
-          title: 'Untitled Board', // Default title
-          description: '', // Default description
-          favourite: false, // Default value
-          position: boardsCount,
-          lists: [] // Position is set based on the number of documents
-      });
-      await board.save(); // Don't forget to save the board
-      res.status(201).json(board);
+    const boards = await Board.find().sort({ position: 1 });
+    res.status(200).json(boards);
   } catch (err) {
-      console.error(err); // Logging the error can help with debugging
-      res.status(500).json({ message: 'Error creating board' });
+    console.error(err);
+    res.status(500).json({ error: 'Error getting boards' });
   }
 };
-
 exports.updatePosition = async (req, res) => {
-  const { boards } = req.body;
   try {
-    for (const key in boards.reverse()) {
-      const board = boards[key];
-      await Board.findByIdAndUpdate(board.id, { $set: { position: key } });
+    const { boards } = req.body;
+    if (!Array.isArray(boards) || !boards.length) {
+      return res.status(400).json({ error: 'Invalid board data' });
     }
-    res.status(200).json('updated');
+
+    await Promise.all(
+      boards.reverse().map((board, index) =>
+        Board.findByIdAndUpdate(board._id, { $set: { position: index } })
+      )
+    );
+
+    res.status(200).json({ message: 'Positions updated successfully' });
   } catch (err) {
-    res.status(500).json(err);
+    console.error(err);
+    res.status(500).json({ error: 'Error updating board positions' });
   }
 };
-
+// Get a single board by ID
 exports.getOne = async (req, res) => {
   const { boardId } = req.params;
   try {
-    const board = await Board.findOne({ list_id: req.params.list_id, _id: boardId });
-    if (!board) return res.status(404).json('Board not found');
+    const board = await Board.findById(boardId);
+    if (!board) {
+      return res.status(404).json({ error: 'Board not found' });
+    }
     res.status(200).json(board);
   } catch (err) {
-    res.status(500).json(err);
+    console.error(err);
+    res.status(500).json({ error: 'Error getting board' });
   }
 };
-
+// Update a board
 exports.update = async (req, res) => {
   const { boardId } = req.params;
   const { title, description, favourite } = req.body;
-
   try {
-    if (title === '') req.body.title = 'Untitled';
-    if (description === '') req.body.description = 'Add description here';
+    const updateData = {};
+    if (title !== undefined) updateData.title = title || 'Untitled';
+    if (description !== undefined) updateData.description = description || '';
+    if (favourite !== undefined) updateData.favourite = favourite;
 
-    const currentBoard = await Board.findById(boardId);
-    if (!currentBoard) return res.status(404).json('Board not found');
-
-    if (favourite !== undefined && currentBoard.favourite !== favourite) {
-      const favourites = await Board.find({
-        favourite: true,
-        _id: { $ne: boardId }
-      }).sort('favouritePosition');
-      if (favourite) {
-        req.body.favouritePosition = favourites.length > 0 ? favourites.length : 0;
-      } else {
-        for (const key in favourites) {
-          const element = favourites[key];
-          await Board.findByIdAndUpdate(element.id, { $set: { favouritePosition: key } });
-        }
-      }
+    const board = await Board.findByIdAndUpdate(boardId, { $set: updateData }, { new: true });
+    if (!board) {
+      return res.status(404).json({ error: 'Board not found' });
     }
-
-    const board = await Board.findByIdAndUpdate(boardId, { $set: req.body });
     res.status(200).json(board);
   } catch (err) {
-    res.status(500).json(err);
+    console.error(err);
+    res.status(500).json({ error: 'Error updating board' });
   }
 };
 
@@ -112,17 +110,31 @@ exports.updateFavouritePosition = async (req, res) => {
     res.status(500).json(err);
     }
     };
-    exports.delete = async (req, res) => {
-    const { boardId } = req.params;
-    try {
+    // Delete a board
+exports.delete = async (req, res) => {
+  const { boardId } = req.params;
+  try {
     const board = await Board.findById(boardId);
-    if (!board) return res.status(404).json('Board not found');
-    // Delete all lists and cards associated with the board
-    await List.deleteMany({ board: boardId });
-    await Card.deleteMany({ board: boardId });
-    await Board.deleteOne({ _id: boardId }); // Update positions of remaining boards const boards = await Board.find().sort('position'); for (const key in boards) { const board = boards[key]; await Board.findByIdAndUpdate(board.id, { $set: { position: key } }); } res.status(200).json('deleted'); } catch (err) { res.status(500).json(err); }};
-    } catch (err) {
-    res.status(500).json(err);
+    if (!board) {
+      return res.status(404).json({ error: 'Board not found' });
     }
-    };
 
+    await Promise.all([
+      List.deleteMany({ board: boardId }),
+      Card.deleteMany({ board: boardId }),
+      Board.deleteOne({ _id: boardId }),
+    ]);
+
+    // Optional: Reorder remaining boards
+    // const boards = await Board.find().sort('position');
+    // boards.forEach((board, index) => {
+    //   board.position = index;
+    //   board.save();
+    // });
+
+    res.status(200).json({ message: 'Board deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error deleting board' });
+  }
+};

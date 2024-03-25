@@ -14,7 +14,15 @@ const checkBoardIdExists = (req, res, next) => {
     })
     .catch(err => res.status(500).send(err.message));
 };
-
+const checkListIdExists = (req, res, next) => {
+  const { listId } = req.params;
+  db.listExists(listId)
+    .then(exists => {
+      if (!exists) return res.status(404).send('List not found');
+      next();
+    })
+    .catch(err => res.status(500).send(err.message));
+}
 // Middleware to check if cardId exists
 const checkCardIdExists = (req, res, next) => {
   const { cardId } = req.params;

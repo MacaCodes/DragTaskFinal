@@ -3,6 +3,7 @@ import axiosClient from './axiosClient';
 const create = async (boardData) => {
   try {
     const response = await axiosClient.post('/boards', JSON.stringify(boardData));
+    console.log(response.data);
     return response.data;
   } catch (error) {
     throw error;
@@ -11,12 +12,13 @@ const create = async (boardData) => {
 
 
 const boardApi = {
-  getAll: () => axiosClient.get('/boards'),
+
+  getAll: () => axiosClient.get('/boards/'),
   getOne: (id) => axiosClient.get(`/boards/${id}`),
-  updatePositoin: (params) => axiosClient.put('boards/', params),
-  updateFavourite: (params) => axiosClient.put('boards/', params),
-  delete: (id) => axiosClient.delete(`boards/${id}`),
-  update: (id, params) => axiosClient.put(`boards/${id}`, params),
+  updatePositoin: (params) => axiosClient.put('/boards/', params),
+  updateFavourite: (params) => axiosClient.put('/boards/favourites', params),
+  delete: (id) => axiosClient.delete(`/boards/${id}`),
+  update: (id, params) => axiosClient.put(`/boards/${id}`, params),
 
 
   // getFavourites: () => axiosClient.get('boards/favourites'),
