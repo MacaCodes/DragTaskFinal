@@ -2,7 +2,7 @@ import { Backdrop, Fade, IconButton, Modal, Box, TextField, Typography, Divider 
 import React, { useEffect, useRef, useState } from 'react';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import Moment from 'moment';
-import taskApi from '../../api/taskApi';
+import cardApi from '../../api/cardApi';
 
 const modalStyle = {
   outline: 'none',

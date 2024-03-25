@@ -1,6 +1,6 @@
 import axiosClient from './axiosClient'
 
-const boardApi = {
+const boards = {
   create: () => axiosClient.post('boards'),
   getAll: () => axiosClient.get('boards'),
   updatePositoin: (params) => axiosClient.put('boards', params),
@@ -14,4 +14,4 @@ const boardApi = {
   // i dont think we need the favourites
 }
 
-export default boardApi
+export default boards

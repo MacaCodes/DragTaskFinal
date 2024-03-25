@@ -24,5 +24,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/api/v1', require('./src/v1/routes'));
 
+// this is backend connecting to front end 
+
 
 module.exports = app;
