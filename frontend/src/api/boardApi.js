@@ -10,23 +10,22 @@ const create = async (boardData) => {
   }
 };
 
-
 const boardApi = {
-
-  getAll: () => axiosClient.get('/boards/'),
+  // Merged and kept the getAll method path consistent with getOne, update, and delete methods
+  getAll: () => axiosClient.get('/boards'),
   getOne: (id) => axiosClient.get(`/boards/${id}`),
-  updatePositoin: (params) => axiosClient.put('/boards/', params),
+
+  updatePosition: (params) => axiosClient.put('/boards', params),
   updateFavourite: (params) => axiosClient.put('/boards/favourites', params),
   delete: (id) => axiosClient.delete(`/boards/${id}`),
   update: (id, params) => axiosClient.put(`/boards/${id}`, params),
 
-
+  // Commented out the favourites functionality as indicated it might not be needed
   // getFavourites: () => axiosClient.get('boards/favourites'),
   // updateFavouritePosition: (params) => axiosClient.put('boards/favourites', params)
-  // i dont think we need the favourites
 }
 
 export { 
   create, 
   boardApi as default 
-}
+};
