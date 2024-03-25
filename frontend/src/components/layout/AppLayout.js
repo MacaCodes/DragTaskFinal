@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
 import { useState, useEffect } from 'react'
+
 import { Outlet } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import Loading from '../common/Loading'
@@ -8,6 +9,7 @@ import Sidebar from '../common/Sidebar'
 const AppLayout = () => {
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(true)
+
 
   useEffect(() => {
     // Simulating user authentication check
