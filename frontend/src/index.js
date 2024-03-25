@@ -3,31 +3,29 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import { store } from './redux/store';
 import { Provider } from 'react-redux';
-import axios from 'axios'; // Import Axios for making HTTP requests
+import axios from 'axios';
+import { useParams } from 'react-router-dom'; 
 
 const API_URL = `http://localhost:3001`;
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-
 const Main = () => {
   const [data, setData] = useState(null);
+  const { boardId } = useParams(); 
 
   useEffect(() => {
-    // Fetch data from your backend API
-    const fetchData = async (boardId) => {
+  
+    const fetchData = async () => {
       try {
-        // Example API call to fetch boards
-        const response = await axios.get(`${API_URL}/boardId/`); // Adjust URL as per your backend routes
+        
+        const response = await axios.get(`${API_URL}/boards/${boardId}`); 
         setData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
     };
 
-    
-
     fetchData();
-  }, []);
+  }, [boardId]); 
 
   return (
     <Provider store={store}>
@@ -41,4 +39,5 @@ const Main = () => {
   );
 };
 
+const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(<Main />);
