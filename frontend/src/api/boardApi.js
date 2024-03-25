@@ -10,11 +10,12 @@ const create = async (boardData) => {
 };
 
 
-const boardApi = {
-  getAll: () => axiosClient.get('/boards'),
-  getOne: (id) => axiosClient.get(`/boards/${id}`),
-  updatePositoin: (params) => axiosClient.put('boards/', params),
-  updateFavourite: (params) => axiosClient.put('boards/', params),
+const boards = {
+  create: () => axiosClient.post('boards'),
+  getAll: () => axiosClient.get('boards'),
+  updatePositoin: (params) => axiosClient.put('boards', params),
+  getOne: (id) => axiosClient.get(`boards/${id}`),
+
   delete: (id) => axiosClient.delete(`boards/${id}`),
   update: (id, params) => axiosClient.put(`boards/${id}`, params),
 
@@ -24,7 +25,8 @@ const boardApi = {
   // i dont think we need the favourites
 }
 
+=======
 export { 
   create, 
-  boardApi as default 
+  boards as default 
 }
