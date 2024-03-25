@@ -11,7 +11,11 @@ const listSchema = new Schema({
   title: {
     type: String,
     default: ''
-  }
+  },
+  cards: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Card'
+  }],
 }, schemaOptions)
 
 module.exports = mongoose.model('List', listSchema)

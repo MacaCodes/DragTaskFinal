@@ -5,8 +5,7 @@ const mongoose = require('mongoose');
 const boardSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
-    default: 'Untitled Board'
+    default: ''
   },
   description: {
     type: String,
@@ -18,11 +17,12 @@ const boardSchema = new mongoose.Schema({
   },
   position: {
     type: Number,
-    required: true
-  },
+    required: true},
   lists: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'List' }],
+    
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Board', boardSchema);

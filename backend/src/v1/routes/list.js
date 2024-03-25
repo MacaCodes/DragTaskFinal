@@ -29,7 +29,11 @@ const checkListIdExists = async (req, res, next) => {
     return res.status(500).send('Server error');
   }
 };
+
+// Define routes
+// router.get('/', listController.getAll);
 router.get('/', checkBoardIdExists, listController.getAll);
+//
 router.get('/:listId', checkBoardIdExists, checkListIdExists, listController.getOne);
 router.post('/', checkBoardIdExists, listController.create);
 router.put('/:listId', checkBoardIdExists, checkListIdExists, listController.update);
