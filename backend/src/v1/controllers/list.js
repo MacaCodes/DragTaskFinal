@@ -1,28 +1,30 @@
 const List = require('../models/list');
 const Card = require('../models/card');
-exports.create = async (req, res) => {
-    console.log('Entering create');
-    const { boardId } = req.params;
-    const { title } = req.body;
-
+exports.create = async (req, res, next) => {
     try {
-        console.log(`Creating list with title ${title} and boardId ${boardId}`);
-        const list = await List.create({ title, boardId });
-        console.log(`Created list: ${JSON.stringify(list)}`);
-        res.status(201).json(list);
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Server error' });
-    }
+      console.log('Entering create');
+      const { title } = req.body;
+      const boardId = req.params.boardId;
+      console.log(`Creating list with title ${title} and boardId ${boardId}`);
+  
+      const list = await List.create({
+        title,
+        board: boardId,
+      });
+      res.status(201).json(list);
+    } catch (error) {
+      console.warn(error);
+      next(error); // Pass the error to the error handling middleware
+  }
 };
 
-exports.getAll = async (req, res) => {
+exports.getAll = async (req, res, next) => {
     console.log('Entering getAll');
     const { boardId } = req.params;
 
     try {
         console.log(`Getting lists for boardId ${boardId}`);
-        const lists = await List.find({ boardId });
+        const lists = await List.find({ });
         console.log(`Found lists: ${JSON.stringify(lists)}`);
         res.status(200).json(lists);
     } catch (err) {

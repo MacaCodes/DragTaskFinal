@@ -91,12 +91,12 @@ const Board = () => {
 
   const addFavourite = async () => {
     try {
-      const board = await boardApi.update(boardId, { favourite: !isFavourite })
-      setIsFavourite(!isFavourite)
+      await boardApi.update(boardId, { favourite: !isFavourite });
+      setIsFavourite(!isFavourite);
     } catch (err) {
-      alert(err)
+      alert(err);
     }
-  }
+  };
 
   const deleteBoard = async () => {
     try {

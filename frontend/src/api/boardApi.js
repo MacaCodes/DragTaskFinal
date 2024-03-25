@@ -1,10 +1,20 @@
-import axiosClient from './axiosClient'
+import axiosClient from './axiosClient';
+
+const create = async (boardData) => {
+  try {
+    const response = await axiosClient.post('/boards', JSON.stringify(boardData));
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 
 const boardApi = {
-  create: () => axiosClient.post('boards'),
-  getAll: () => axiosClient.get('boards'),
-  updatePositoin: (params) => axiosClient.put('boards', params),
-  getOne: (id) => axiosClient.get(`boards/${id}`),
+  getAll: () => axiosClient.get('/boards'),
+  getOne: (id) => axiosClient.get(`/boards/${id}`),
+  updatePositoin: (params) => axiosClient.put('boards/', params),
+  updateFavourite: (params) => axiosClient.put('boards/', params),
   delete: (id) => axiosClient.delete(`boards/${id}`),
   update: (id, params) => axiosClient.put(`boards/${id}`, params),
 
@@ -14,4 +24,7 @@ const boardApi = {
   // i dont think we need the favourites
 }
 
-export default boardApi
+export { 
+  create, 
+  boardApi as default 
+}
