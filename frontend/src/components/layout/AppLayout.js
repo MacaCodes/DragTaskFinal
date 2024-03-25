@@ -1,30 +1,50 @@
 import { Box } from '@mui/material'
 import { useState, useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
-// import Sidebar from '../common/Sidebar'
+
+import { Outlet } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
 import Loading from '../common/Loading'
+import Sidebar from '../common/Sidebar'
 
 const AppLayout = () => {
-  const navigate = useNavigate()
   const dispatch = useDispatch()
   const [loading, setLoading] = useState(true)
+
+
   useEffect(() => {
-    // You might perform any other initialization logic here if needed
+    // Simulating user authentication check
+    const checkAuth = async () => {
+      // Replace this logic with your own authentication mechanism
+      const user = true // Assuming user is authenticated
+      if (!user) {
+        // If user is not authenticated, redirect to login page
+        // navigate('/login')
+      } else {
+        // If user is authenticated, save user information (if needed)
+        // dispatch(setUser(user))
+        setLoading(false)
+      }
+    }
+    checkAuth()
   }, [])
 
   return (
-    <Box sx={{
-      display: 'flex'
-    }}>
-      <Sidebar />
+    loading ? (
+      <Loading fullHeight />
+    ) : (
       <Box sx={{
-        flexGrow: 1,
-        p: 1,
-        width: 'max-content'
+        display: 'flex'
       }}>
-        <Outlet />
+        <Sidebar />
+        <Box sx={{
+          flexGrow: 1,
+          p: 1,
+          width: 'max-content'
+        }}>
+          <Outlet />
+        </Box>
       </Box>
-    </Box>
+    )
   )
 }
 
