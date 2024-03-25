@@ -41,7 +41,15 @@ router.post(
   checkBoardIdExists, // Your custom middleware to check if boardId exists in the database
   cardController.create
 );
-
+// Route to handle retrieving cards for a specific list
+router.get(
+  '/list/:listId',
+  param('boardId').exists(),
+  param('listId').exists(),
+  checkBoardIdExists,
+  checkListIdExists,
+  cardController.getCardsForList
+);
 router.put(
   '/update-position',
   param('boardId').exists(),

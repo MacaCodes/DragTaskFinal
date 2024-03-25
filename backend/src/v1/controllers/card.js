@@ -29,7 +29,16 @@ exports.update = async (req, res) => {
     res.status(500).json(err)
   }
 }
-
+exports.getCardsForList = async (req, res) => {
+  const { listId } = req.params;
+  try {
+    const cards = await Card.find({ list: listId }).sort('position');
+    res.status(200).json(cards);
+  } catch (err) {
+    console.log(err, 'Error getting cards');
+    res.status(500).json(err);
+  }
+};
 exports.delete = async (req, res) => {
   const { cardId } = req.params
   try {
