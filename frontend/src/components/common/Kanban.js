@@ -55,6 +55,14 @@ const Kanban = props => {
       alert(err)
     }
   }
+  // const updateEditorHeight = () => {
+  //   setTimeout(() => {
+  //     if (editorWrapperRef.current) {
+  //       const box = editorWrapperRef.current
+  //       box.querySelector('.editor-content').style.height = (box.offsetHeight - 50) + 'px'
+  //     }
+  //   }, timeout)
+  // }
 
   const createSection = async () => {
     try {

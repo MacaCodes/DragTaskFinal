@@ -47,6 +47,19 @@ root.render(
 //         {/* Display fetched data here */}
 //         <pre>{JSON.stringify(data, null, 2)}</pre>
 //       </div>
+
+
+//       <App />
+//     </Provider>
+//   );
+// };
+
+//       {/* Display fetched data */}
+//       <div>
+//         <h1>Hey baby</h1>
+//         <pre>{JSON.stringify(data, null, 2)}</pre> {/* Display fetched data here */}
+//       </div>
+//       <App />
 //     </Provider>
 //   );
 // };
