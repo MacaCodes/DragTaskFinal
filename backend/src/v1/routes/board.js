@@ -1,29 +1,56 @@
-// routes/boardRoutes.js
-const router = require('express').Router();
+const express = require('express');
+const { param } = require('express-validator');
+const router = express.Router();
 const boardController = require('../controllers/board');
-const db = require('../db'); // Assuming dbModule.js is in the parent directory
+const listController = require('../controllers/list');
 
-// Middleware to check if boardId exists
-const checkBoardIdExists = async (req, res, next) => {
-    try {
-    const { boardId } = req.params;
-    const exists = await db.boardExists(boardId);
-    if (!exists) {
-        return res.status(404).send({ error: 'Board not found' });
-    }
-    next();
-  } catch (error) {
-    return res.status(500).send({ error: 'Server error' });
-  }
-};
+// Create a new board
+router.post(
+  '/',
+  boardController.create
+);
 
-router.post('/', boardController.create);
-router.get('/', boardController.getAll);
-router.put('/', boardController.updatePosition);
-router.get('/favourites', boardController.getFavourites);
-router.put('/favourites', boardController.updateFavouritePosition);
-router.get('/:boardId', checkBoardIdExists, boardController.getOne);
-router.put('/:boardId', checkBoardIdExists, boardController.update);
-router.delete('/:boardId', checkBoardIdExists, boardController.delete);
+// Get all boards
+router.get(
+  '/',
+  boardController.getAll
+);
+
+// Update board positions
+router.put(
+  '/position',
+  boardController.updatePosition
+);
+
+// Get a single board by ID, validating boardId as a MongoDB ObjectId
+router.get(
+  '/:boardId',
+  param('boardId').isMongoId().withMessage('Invalid board ID'),
+  boardController.getOne
+);
+
+// Update a board by ID, validating boardId as a MongoDB ObjectId
+router.put(
+  '/:boardId',
+  param('boardId').isMongoId().withMessage('Invalid board ID'),
+  boardController.update
+);
+// Create a new list
+router.post('/:boardId/lists', listController.create);
+
+// Get all lists for a board
+router.get('/:boardId/lists', listController.getAll);
+
+// Delete a board by ID, validating boardId as a MongoDB ObjectId
+router.delete(
+  '/:boardId',
+  param('boardId').isMongoId().withMessage('Invalid board ID'),
+  boardController.delete);
+
+// Get a single list by ID, validating listId as a MongoDB ObjectId
+router.get('/:boardId/lists/:listId', listController.getOne);
+
+// Delete a list by ID, validating listId as a MongoDB ObjectId
+router.delete('/:boardId/lists/:listId', listController.delete);
 
 module.exports = router;

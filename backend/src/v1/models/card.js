@@ -3,13 +3,10 @@ const Schema = mongoose.Schema
 const { schemaOptions } = require('./modelOptions')
 
 const taskSchema = new Schema({
-  list_id: [{
+  list: [{
     type: Schema.Types.ObjectId,
     ref: 'List',
-  }],
-  board_id: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Board',
+    required: true
   }],
   title: {
     type: String,

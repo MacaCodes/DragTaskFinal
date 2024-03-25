@@ -2,98 +2,119 @@ const Card = require('../models/card')
 const List = require('../models/list')
 
 exports.create = async (req, res) => {
+  const { listId } = req.params;
   try {
-    const { listId } = req.params;
-    const { title, description } = req.body;
-
-    if (!title || !description) {
-      return res.status(400).json({ error: 'Title and description are required.' });
-    }
-
-    const newPosition = await Card.countDocuments({ listId }) + 1;
-    const card = await Card.create({ title, description, listId, position: newPosition });
-
-    res.status(201).json(card);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error while creating card.' });
+    const list = await List.findById(listId);
+    const cardCount = await Card.find({ list: listId }).countDocuments();
+    const card = await Card.create({
+      list: listId,
+      position: cardCount > 0 ? cardCount : 0
+    })
+    card._doc.list = list;
+      await card.save();
+      res.status(201).json(card);
+  } catch (err) {
+      res.status(500).json({ message: 'Failed to create card', err });
   }
 };
 
+//get card
+exports.getOne = async (req, res) => {
+  const { cardId } = req.params;
+  
+  try {
+      const card = await Card.findById(cardId);
+      if (!card) return res.status(404).json({ message: 'Card not found' });
+      res.json(card);
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to get card', error });
+  }
+};
+
+//get all
+exports.getAll = async (req, res) => {
+  const { listId } = req.params;
+  
+  try {
+      const cards = await Card.find({ list: listId }).sort('position');
+      res.json(cards);
+  } catch (error) {
+      res.status(500).json({ message: 'Failed to get cards', error });
+  }
+};
 
 // Update Card
 exports.update = async (req, res) => {
   const { cardId } = req.params;
-  const { title, description } = req.body;
-
   try {
-    const updatedCard = await Card.findByIdAndUpdate(cardId, { title, description }, { new: true });
-    if (!updatedCard) {
-      return res.status(404).json({ error: 'Card not found.' });
-    }
-
-    res.status(200).json(updatedCard);
-  } catch (error) {
-    res.status(500).json({ error: 'Server error while updating card.' });
-  }
-};
-
-exports.getCardsForList = async (req, res) => {
-  const { listId } = req.params;
-  try {
-    const cards = await Card.find({ list: listId }).sort('position');
-    if (!cards) {
-      return res.status(404).json({ message: 'No cards found for this list.' });
-    }
-    res.status(200).json(cards);
+    const card = await Card.findByIdAndUpdate(cardId,
+      { $set: req.body },
+    )
+    res.status(200).json(card);
   } catch (err) {
-    console.error('Error getting cards:', err);
-    res.status(500).json({ message: 'Failed to get cards due to server error.' });
+    res.status(500).json({ message: 'Server error while updating card.', err });
   }
 };
 
-exports.delete = async (req, res) => {
-  const { cardId } = req.params;
-  try {
-    const currentCard = await Card.findById(cardId);
-    if (!currentCard) {
-      return res.status(404).json({ message: 'Card not found.' });
-    }
-    await Card.deleteOne({ _id: cardId });
-    const remainingCards = await Card.find({ list: currentCard.list }).sort('position');
-    remainingCards.forEach(async (card, index) => {
-      await Card.findByIdAndUpdate(card.id, { position: index });
-    });
-    res.status(200).json({ message: 'Card deleted successfully.' });
-  } catch (err) {
-    console.error('Error deleting card:', err);
-    res.status(500).json({ message: 'Failed to delete card due to server error.' });
-  }
-};
+//update position
 
 
 exports.updatePosition = async (req, res) => {
   const {
     resourceList,
     destinationList,
-    resourceListId,
-    destinationListId,
-  } = req.body;
-
+    resourceSectionId,
+    destinationSectionId
+  } = req.body
+  const resourceListReverse = resourceList.reverse();
+  const destinationListReverse = destinationList.reverse();
   try {
-    // Update position within the same list or move to a different list
-    if (resourceListId !== destinationListId) {
-      await Promise.all(resourceList.reverse().map(async (card, index) => {
-        await Card.findByIdAndUpdate(card.id, { $set: { list: resourceListId, position: index } });
-      }));
+    if (resourceSectionId !== destinationSectionId){
+      for (const key in resourceListReverse) {
+        await Card.findByIdAndUpdate(resourceListReverse[key]._id,
+          {
+            $set: {
+              list: resourceSectionId,
+              position: key
+            }
+          }
+        )
+      }
     }
+    for (const key in destinationListReverse) {
+        await Card.findByIdAndUpdate(
+          destinationListReverse[key]._id,
+          {
+            $set: {
+              list: destinationSectionId,
+              position: key
+            }
+          }
+        )
+      }
+      res.status(200).json({ message: 'Card positions updated successfully.' });
+    } catch (err) {
+      console.error('Error updating card positions:', err);
+      res.status(500).json({ message: 'Failed to update card positions due to server error.' });
+    }
+  }
 
-    await Promise.all(destinationList.reverse().map(async (card, index) => {
-      await Card.findByIdAndUpdate(card.id, { $set: { list: destinationListId, position: index } });
-    }));
-
-    res.status(200).json({ message: 'Card positions updated successfully.' });
+exports.delete = async (req, res) => {
+  const { cardId } = req.params;
+  try {
+    const currentCard = await Card.findById(cardId);
+    await Card.deleteOne({ _id: cardId });
+    const cards = await Card.find({ list: currentCard.list }).sort('position');
+    if (!currentCard) {
+      return res.status(404).json({ message: 'Card not found.' });
+    } 
+    for (const key in cards) {
+      await Card.findByIdAndUpdate(cards[key]._id, {$set:{position: key }}
+      );
+    }
+    res.status(200).json({ message: 'Card deleted successfully.' });
   } catch (err) {
-    console.error('Error updating card positions:', err);
-    res.status(500).json({ message: 'Failed to update card positions due to server error.' });
+    console.error('Error deleting card:', err);
+    res.status(500).json({ message: 'Failed to delete card due to server error.' });
   }
 };

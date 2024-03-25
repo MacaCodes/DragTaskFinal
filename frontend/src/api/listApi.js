@@ -1,12 +1,13 @@
 import axiosClient from './axiosClient'
 
-const columnApi = {
-  create: (boardId) => axiosClient.post(`boards/${boardId}/columns`),
-  update: (boardId, columnId, params) => axiosClient.put(
-    `boards/${boardId}/columns/${columnId}`,
+const listApi = {
+  create: (boardId) => axiosClient.post(`boards/${boardId}/lists`),
+  update: (boardId, listId, params) => axiosClient.put(
+    `boards/${boardId}/lists/${listId}`,
     params
   ),
-  delete: (boardId, columnId) => axiosClient.delete(`boards/${boardId}/columns/${columnId}`)
+  delete: (boardId, listId) => axiosClient.delete(`boards/${boardId}/lists/${listId}`)
 }
 
-export default columnApi
+export default listApi
+
