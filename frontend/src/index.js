@@ -1,43 +1,30 @@
-import React, { useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import App from './App';
-import { store } from './redux/store';
 import { Provider } from 'react-redux';
-import axios from 'axios';
-import { useParams } from 'react-router-dom'; 
+import { store } from './redux/store';
 
-const API_URL = `http://localhost:3001`;
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-const Main = () => {
-  const [data, setData] = useState(null);
-  const { boardId } = useParams(); 
-
-  useEffect(() => {
-  
-    const fetchData = async () => {
-      try {
-        
-        const response = await axios.get(`${API_URL}/boards/${boardId}`); 
-        setData(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, [boardId]); 
-
-  return (
+root.render(
     <Provider store={store}>
-      {/* Display fetched data */}
-      <div>
-        <h1>Hey baby</h1>
-        <pre>{JSON.stringify(data, null, 2)}</pre> {/* Display fetched data here */}
-      </div>
       <App />
     </Provider>
   );
-};
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(<Main />);
+//       <App />
+//     </Provider>
+//   );
+// };
+
+//       {/* Display fetched data */}
+//       <div>
+//         <h1>Hey baby</h1>
+//         <pre>{JSON.stringify(data, null, 2)}</pre> {/* Display fetched data here */}
+//       </div>
+//       <App />
+//     </Provider>
+//   );
+// };
+
+// root.render(<Main />);
