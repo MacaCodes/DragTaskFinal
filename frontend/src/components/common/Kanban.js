@@ -11,9 +11,9 @@ import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import sectionApi from "../../api/sectionApi";
-import taskApi from "../../api/taskApi";
-import TaskModal from "./TaskModal";
+import listApi from "../../api/listApi";
+import cardApi from "../../api/cardApi";
+import CardModal from "./CardModal";
 
 let timer;
 const timeout = 500;
@@ -21,7 +21,7 @@ const timeout = 500;
 const Kanban = (props) => {
   const boardId = props.boardId;
   const [data, setData] = useState([]);
-  const [selectedTask, setSelectedTask] = useState(undefined);
+  const [selectedCard, setSelectedCard] = useState(undefined);
 
   useEffect(() => {
     setData(props.data);
@@ -36,29 +36,29 @@ const Kanban = (props) => {
     const sourceCol = data[sourceColIndex];
     const destinationCol = data[destinationColIndex];
 
-    const sourceSectionId = sourceCol.id;
-    const destinationSectionId = destinationCol.id;
+    const sourceListId = sourceCol.id;
+    const destinationListId = destinationCol.id;
 
-    const sourceTasks = [...sourceCol.tasks];
-    const destinationTasks = [...destinationCol.tasks];
+    const sourceCards = [...sourceCol.cards];
+    const destinationCards = [...destinationCol.cards];
 
     if (source.droppableId !== destination.droppableId) {
-      const [removed] = sourceTasks.splice(source.index, 1);
-      destinationTasks.splice(destination.index, 0, removed);
-      data[sourceColIndex].tasks = sourceTasks;
-      data[destinationColIndex].tasks = destinationTasks;
+      const [removed] = sourceCards.splice(source.index, 1);
+      destinationCards.splice(destination.index, 0, removed);
+      data[sourceColIndex].cards = sourceCards;
+      data[destinationColIndex].cards = destinationCards;
     } else {
-      const [removed] = destinationTasks.splice(source.index, 1);
-      destinationTasks.splice(destination.index, 0, removed);
-      data[destinationColIndex].tasks = destinationTasks;
+      const [removed] = destinationCards.splice(source.index, 1);
+      destinationCards.splice(destination.index, 0, removed);
+      data[destinationColIndex].cards = destinationCards;
     }
 
     try {
-      await taskApi.updatePosition(boardId, {
-        resourceList: sourceTasks,
-        destinationList: destinationTasks,
-        resourceSectionId: sourceSectionId,
-        destinationSectionId: destinationSectionId,
+      await cardApi.updatePosition(boardId, {
+        resourceList: sourceCards,
+        destinationList: destinationCards,
+        resourceListId: sourceListId,
+        destinationListId: destinationListId,
       });
       setData(data);
     } catch (err) {
@@ -66,70 +66,70 @@ const Kanban = (props) => {
     }
   };
 
-  const createSection = async () => {
+  const createList = async () => {
     try {
-      const section = await sectionApi.create(boardId);
-      setData([...data, section]);
+      const list = await listApi.create(boardId);
+      setData([...data, list]);
     } catch (err) {
       alert(err);
     }
   };
 
-  const deleteSection = async (sectionId) => {
+  const deleteList = async (listId) => {
     try {
-      await sectionApi.delete(boardId, sectionId);
-      const newData = [...data].filter((e) => e.id !== sectionId);
+      await listApi.delete(boardId, listId);
+      const newData = [...data].filter((e) => e.id !== listId);
       setData(newData);
     } catch (err) {
       alert(err);
     }
   };
 
-  const updateSectionTitle = async (e, sectionId) => {
+  const updateListTitle = async (e, listId) => {
     clearTimeout(timer);
     const newTitle = e.target.value;
     const newData = [...data];
-    const index = newData.findIndex((e) => e.id === sectionId);
+    const index = newData.findIndex((e) => e.id === listId);
     newData[index].title = newTitle;
     setData(newData);
     timer = setTimeout(async () => {
       try {
-        await sectionApi.update(boardId, sectionId, { title: newTitle });
+        await listApi.update(boardId, listId, { title: newTitle });
       } catch (err) {
         alert(err);
       }
     }, timeout);
   };
 
-  const createTask = async (sectionId) => {
+  const createCard = async (listId) => {
     try {
-      const task = await taskApi.create(boardId, { sectionId });
+      const card = await cardApi.create(boardId, { listId });
       const newData = [...data];
-      const index = newData.findIndex((e) => e.id === sectionId);
-      newData[index].tasks.unshift(task);
+      const index = newData.findIndex((e) => e.id === listId);
+      newData[index].cards.unshift(card);
       setData(newData);
     } catch (err) {
       alert(err);
     }
   };
 
-  const onUpdateTask = (task) => {
+  const onUpdateCard = (card) => {
     const newData = [...data];
-    const sectionIndex = newData.findIndex((e) => e.id === task.section.id);
-    const taskIndex = newData[sectionIndex].tasks.findIndex(
-      (e) => e.id === task.id
+    const listIndex = newData.findIndex((e) => e.id === card.list.id);
+    const cardIndex = newData[listIndex].cards.findIndex(
+      (e) => e.id === card.id
     );
-    newData[sectionIndex].tasks[taskIndex] = task;
+    newData[listIndex].cards[cardIndex] = card;
     setData(newData);
   };
 
-  const onDeleteTask = (task) => {
+  const onDeleteCard = (card) => {
     const newData = [...data];
-    const sectionIndex = newData.findIndex((e) => e.id === task.section.id);
-    const taskIndex = newData[sectionIndex].tasks.findIndex(
-      (e) => e.id === task.id
+    const listIndex = newData.findIndex((e) => e.id === card.list.id);
+    const cardIndex = newData[listIndex].cards.findIndex(
+      (e) => e.id === card.id
     );
-    newData[sectionIndex].tasks.splice(taskIndex, 1);
+    newData[listIndex].cards.splice(cardIndex, 1);
     setData(newData);
   };
 
@@ -142,9 +142,9 @@ const Kanban = (props) => {
           justifyContent: "space-between",
         }}
       >
-        <Button onClick={createSection}>Add section</Button>
+        <Button onClick={createList}>Add list</Button>
         <Typography variant="body2" fontWeight="700">
-          {data.length} Sections
+          {data.length} Lists
         </Typography>
       </Box>
       <Divider sx={{ margin: "10px 0" }} />
@@ -157,9 +157,9 @@ const Kanban = (props) => {
             overflowX: "auto",
           }}
         >
-          {data.map((section) => (
-            <div key={section.id} style={{ width: "300px" }}>
-              <Droppable key={section.id} droppableId={section.id}>
+          {data.map((list) => (
+            <div key={list.id} style={{ width: "300px" }}>
+              <Droppable key={list.id} droppableId={list.id}>
                 {(provided) => (
                   <Box
                     ref={provided.innerRef}
@@ -179,8 +179,8 @@ const Kanban = (props) => {
                       }}
                     >
                       <TextField
-                        value={section.title}
-                        onChange={(e) => updateSectionTitle(e, section.id)}
+                        value={list.title}
+                        onChange={(e) => updateListTitle(e, list.id)}
                         placeholder="Untitled"
                         variant="outlined"
                         sx={{
@@ -202,7 +202,7 @@ const Kanban = (props) => {
                           color: "gray",
                           "&:hover": { color: "green" },
                         }}
-                        onClick={() => createTask(section.id)}
+                        onClick={() => createCard(list.id)}
                       >
                         <AddOutlinedIcon />
                       </IconButton>
@@ -213,16 +213,16 @@ const Kanban = (props) => {
                           color: "gray",
                           "&:hover": { color: "red" },
                         }}
-                        onClick={() => deleteSection(section.id)}
+                        onClick={() => deleteList(list.id)}
                       >
                         <DeleteOutlinedIcon />
                       </IconButton>
                     </Box>
-                    {/* Tasks */}
-                    {section.tasks.map((task, index) => (
+                    {/* Cards */}
+                    {list.cards.map((card, index) => (
                       <Draggable
-                        key={task.id}
-                        draggableId={task.id}
+                        key={card.id}
+                        draggableId={card.id}
                         index={index}
                       >
                         {(provided, snapshot) => (
@@ -237,10 +237,10 @@ const Kanban = (props) => {
                                 ? "grab"
                                 : "pointer!important",
                             }}
-                            onClick={() => setSelectedTask(task)}
+                            onClick={() => setSelectedCard(card)}
                           >
                             <Typography>
-                              {task.title === "" ? "Untitled" : task.title}
+                              {card.title === "" ? "Untitled" : card.title}
                             </Typography>
                           </Card>
                         )}
@@ -254,12 +254,12 @@ const Kanban = (props) => {
           ))}
         </Box>
       </DragDropContext>
-      <TaskModal
-        task={selectedTask}
+      <CardModal
+        card={selectedCard}
         boardId={boardId}
-        onClose={() => setSelectedTask(undefined)}
-        onUpdate={onUpdateTask}
-        onDelete={onDeleteTask}
+        onClose={() => setSelectedCard(undefined)}
+        onUpdate={onUpdateCard}
+        onDelete={onDeleteCard}
       />
     </>
   );

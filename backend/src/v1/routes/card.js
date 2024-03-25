@@ -1,42 +1,20 @@
-const router = require('express').Router({ mergeParams: true })
-const { param, body } = require('express-validator')
+const express = require('express');
+const { checkBoardExists, checkListExists, checkCardExists } = require('../middlewares/validationMiddleware');
+const cardController = require('../controllers/cardController');
 
-const cardController = require('../controllers/card')
-const db = require('../db.js'); // Assuming this is your database module
+const router = express.Router({ mergeParams: true });
 
-// Middleware to check if boardId exists
-const checkBoardIdExists = (req, res, next) => {
-  const { boardId } = req.params;
-  db.boardExists(boardId)
-    .then(exists => {
-      if (!exists) return res.status(404).send('Board not found');
-      next();
-    })
-    .catch(err => res.status(500).send(err.message));
-};
-const checkListIdExists = (req, res, next) => {
-  const { listId } = req.params;
-  db.listExists(listId)
-    .then(exists => {
-      if (!exists) return res.status(404).send('List not found');
-      next();
-    })
-    .catch(err => res.status(500).send(err.message));
-}
-// Middleware to check if cardId exists
-const checkCardIdExists = (req, res, next) => {
-  const { cardId } = req.params;
-  db.cardExists(cardId)
-    .then(exists => {
-      if (!exists) return res.status(404).send('Card not found');
-      next();
-    })
-    .catch(err => res.status(500).send(err.message));
-};
+router.use('/:cardId', checkCardExists);
 
-router.post(
-  '/',
-  param('boardId').exists(), // Using express-validator to check if param exists in the request
+router.post('/', [checkBoardExists, checkListExists], cardController.create);
+router.get('/', [checkBoardExists, checkListExists], cardController.getCardsForList);
+router.put('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.update);
+router.delete('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.delete);
+router.patch('/:cardId/position', [checkBoardExists, checkListExists, checkCardExists], cardController.updatePosition);
+router.post('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.updatePosition);
+
+  
+router.post(param('boardId').exists(), // Using express-validator to check if param exists in the request
   body('listId').exists(), // Using express-validator to check if body param exists
   checkBoardIdExists, // Your custom middleware to check if boardId exists in the database
   cardController.create

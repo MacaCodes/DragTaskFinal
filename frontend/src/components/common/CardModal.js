@@ -22,22 +22,22 @@ let timer;
 const timeout = 500;
 let isModalClosed = false;
 
-const TaskModal = (props) => {
+const CardModal = (props) => {
   const boardId = props.boardId;
-  const [task, setTask] = useState(props.task);
+  const [card, setCard] = useState(props.card);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const editorWrapperRef = useRef();
 
   useEffect(() => {
-    setTask(props.task);
-    setTitle(props.task !== undefined ? props.task.title : '');
-    setContent(props.task !== undefined ? props.task.content : '');
-    if (props.task !== undefined) {
+    setCard(props.card);
+    setTitle(props.card !== undefined ? props.card.title : '');
+    setContent(props.card !== undefined ? props.card.content : '');
+    if (props.card !== undefined) {
       isModalClosed = false;
       updateEditorHeight();
     }
-  }, [props.task]);
+  }, [props.card]);
 
   const updateEditorHeight = () => {
     setTimeout(() => {
@@ -50,50 +50,54 @@ const TaskModal = (props) => {
 
   const onClose = () => {
     isModalClosed = true;
-    props.onUpdate(task);
+    props.onUpdate(card);
     props.onClose();
   };
 
-  const deleteTask = async () => {
-    try {
-      // Call your API to delete the task
-      // await taskApi.delete(boardId, task.id);
-      props.onDelete(task);
-      setTask(undefined);
-    } catch (err) {
-      alert(err);
-    }
-  };
-
-  const updateTitle = (e) => {
-    clearTimeout(timer);
+ // Delete card function
+const deleteCard = async () => {
+  try {
+    await cardApi.delete(boardId, card.id);
+    props.onDelete(card);
+    onClose(); // Close the modal after deletion
+  } catch (error) {
+    alert('Error deleting card');
+  }
+}
+  // Update title function
+  const updateTitle = async (e) => {
     const newTitle = e.target.value;
-    timer = setTimeout(() => {
-      // Call your API to update the task title
-      // taskApi.update(boardId, task.id, { title: newTitle });
-      task.title = newTitle;
-      setTitle(newTitle);
-      props.onUpdate(task);
+    setTitle(newTitle);
+  
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      try {
+        await cardApi.update(boardId, card.id, { title: newTitle });
+        card.title = newTitle;
+        props.onUpdate(card);
+      } catch (error) {
+        alert('Error updating card title');
+      }
     }, timeout);
   };
-
+  
   const updateContent = (e) => {
     const data = e.target.value;
     setContent(data);
-    // Update the task content in local state
-    task.content = data;
-    props.onUpdate(task);
+    // Update the card content in local state
+    card.content = data;
+    props.onUpdate(card);
   };
 
   return (
     <Modal
-      open={task !== undefined}
+      open={card !== undefined}
       onClose={onClose}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
     >
-      <Fade in={task !== undefined}>
+      <Fade in={card !== undefined}>
         <Box sx={modalStyle}>
           <Box sx={{
             display: 'flex',
@@ -101,7 +105,7 @@ const TaskModal = (props) => {
             justifyContent: 'flex-end',
             width: '100%'
           }}>
-            <IconButton variant='outlined' color='error' onClick={deleteTask}>
+            <IconButton variant='outlined' color='error' onClick={deleteCard}>
               <DeleteOutlinedIcon />
             </IconButton>
           </Box>
@@ -126,7 +130,7 @@ const TaskModal = (props) => {
               }}
             />
             <Typography variant='body2' fontWeight='700'>
-              {task !== undefined ? Moment(task.createdAt).format('YYYY-MM-DD') : ''}
+              {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
             </Typography>
             <Divider sx={{ margin: '1.5rem 0' }} />
             <Box
@@ -156,4 +160,5 @@ const TaskModal = (props) => {
   );
 };
 
-export default TaskModal;
+
+export default CardModal;
