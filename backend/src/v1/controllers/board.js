@@ -70,11 +70,10 @@ exports.updatePosition = async (req, res) => {
   }
 }
 
-
 // Update a board data
 exports.update = async (req, res) => {
   const { boardId } = req.params;
-  const { title, description, selected } = req.body;
+  const { title, description } = req.body;
 
   try {
     if (title === '') req.body.title = 'Untitled';
@@ -83,16 +82,12 @@ exports.update = async (req, res) => {
     const currentBoard = await Board.findById(boardId);
     if (!currentBoard) return res.status(404).json('Board not found');
 
-    if (selected && selected.length > 0) {
-      req.body.lists = selected.filter(list => list.boardId !== boardId).sort('-position');
-    }
-
     const updateData = {};
     for (const key in currentBoard) {
       const value = currentBoard[key];
       if (value !== undefined) updateData[key] = value;
       if (key === 'lists') {
-        updateData.lists = value.sort('-position');
+        updateData.lists = value.sort((a, b) => b.position - a.position);
       }
       if (key === 'position') {
         updateData.position = value;

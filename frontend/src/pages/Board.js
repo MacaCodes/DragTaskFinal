@@ -1,115 +1,92 @@
-import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
-import { Box, IconButton, TextField } from '@mui/material'
-import { useEffect, useState } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { useNavigate, useParams } from 'react-router-dom'
-import boardApi from '../api/boardApi'
-import { setBoards } from '../redux/features/boardSlice'
-import Kanban from '../components/common/Kanban'
+import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+import { Box, IconButton, TextField } from '@mui/material';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate, useParams } from 'react-router-dom';
+import boardApi from '../api/boardApi';
+import { setBoard } from '../redux/features/boardSlice';
+import Kanban from '../components/common/Kanban';
 
-let timer
-const timeout = 500
+let timer;
+const timeout = 500;
 
 const Board = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
-  const { boardId } = useParams()
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [sections, setSections] = useState([])
-  const [icon, setIcon] = useState('')
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { boardId } = useParams();
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [sections, setSections] = useState([]);
 
-  const boards = useSelector((state) => state.board.value)
+  const board = useSelector((state) => state.board.value);
 
   useEffect(() => {
     const getBoard = async () => {
       try {
-        const res = await boardApi.getOne(boardId)
-        setTitle(res.title)
-        setDescription(res.description)
-        setSections(res.lists)
-        setIcon(res.icon)
+        const res = await boardApi.getOne(boardId);
+        setTitle(res.title);
+        setDescription(res.description);
+        setSections(res.lists);
       } catch (err) {
-        alert(err)
+        alert(err);
       }
-    }
+    };
     if (boardId) {
-      getBoard()
+      getBoard();
     }
-  }, [boardId])
+  }, [boardId]);
 
-
-  const onIconChange = async (newIcon) => {
-    let temp = [...boards]
-    const index = temp.findIndex(e => e.id === boardId)
-    temp[index] = { ...temp[index], icon: newIcon }
-
-    setIcon(newIcon)
-    dispatch(setBoards(temp))
-    try {
-      await boardApi.update(boardId, { icon: newIcon })
-    } catch (err) {
-      alert(err)
-    }
-  }
 
   const updateTitle = async (e) => {
-    clearTimeout(timer)
-    const newTitle = e.target.value
-    setTitle(newTitle)
+    clearTimeout(timer);
+    const newTitle = e.target.value;
+    setTitle(newTitle);
 
-    let temp = [...boards]
-    const index = temp.findIndex(e => e.id === boardId)
-    temp[index] = { ...temp[index], title: newTitle }
-
-    dispatch(setBoards(temp))
+    dispatch(setBoard({ ...board, title: newTitle }));
 
     timer = setTimeout(async () => {
       try {
-        await boardApi.update(boardId, { title: newTitle })
+        await boardApi.update(boardId, { title: newTitle });
       } catch (err) {
-        alert(err)
+        alert(err);
       }
     }, timeout);
-  }
+  };
 
   const updateDescription = async (e) => {
-    clearTimeout(timer)
-    const newDescription = e.target.value
-    setDescription(newDescription)
+    clearTimeout(timer);
+    const newDescription = e.target.value;
+    setDescription(newDescription);
     timer = setTimeout(async () => {
       try {
-        await boardApi.update(boardId, { description: newDescription })
+        await boardApi.update(boardId, { description: newDescription });
       } catch (err) {
-        alert(err)
+        alert(err);
       }
     }, timeout);
-  }
+  };
 
   const deleteBoard = async () => {
     try {
-      await boardApi.delete(boardId)
-      const newList = boards.filter(e => e.id !== boardId)
-      if (newList.length === 0) {
-        navigate('/boards')
-      } else {
-        navigate(`/boards/${newList[0].id}`)
-      }
-      dispatch(setBoards(newList))
+      await boardApi.delete(boardId);
+      dispatch(setBoard (null));
+      navigate('/boards');
     } catch (err) {
-      alert(err)
+      alert(err);
     }
-  }
+  };
 
   return (
     <>
-      <Box sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        width: '100%'
-      }}>
-        <IconButton variant='outlined' color='error' onClick={deleteBoard}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+        }}
+      >
+        <IconButton variant="outlined" color="error" onClick={deleteBoard}>
           <DeleteOutlinedIcon />
         </IconButton>
       </Box>
@@ -118,26 +95,26 @@ const Board = () => {
           <TextField
             value={title}
             onChange={updateTitle}
-            placeholder='Untitled'
-            variant='outlined'
+            placeholder="Untitled"
+            variant="outlined"
             fullWidth
             sx={{
               '& .MuiOutlinedInput-input': { padding: 0 },
               '& .MuiOutlinedInput-notchedOutline': { border: 'unset ' },
-              '& .MuiOutlinedInput-root': { fontSize: '2rem', fontWeight: '700' }
+              '& .MuiOutlinedInput-root': { fontSize: '2rem', fontWeight: '700' },
             }}
           />
           <TextField
             value={description}
             onChange={updateDescription}
-            placeholder='Add a description'
-            variant='outlined'
+            placeholder="Add a description"
+            variant="outlined"
             multiline
             fullWidth
             sx={{
               '& .MuiOutlinedInput-input': { padding: 0 },
               '& .MuiOutlinedInput-notchedOutline': { border: 'unset ' },
-              '& .MuiOutlinedInput-root': { fontSize: '0.8rem' }
+              '& .MuiOutlinedInput-root': { fontSize: '0.8rem' },
             }}
           />
         </Box>
@@ -146,7 +123,7 @@ const Board = () => {
         </Box>
       </Box>
     </>
-  )
-}
+  );
+};
 
-export default Board
+export default Board;
