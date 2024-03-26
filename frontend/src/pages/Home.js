@@ -1,7 +1,7 @@
 import { Box } from "@mui/material"
 import LoadingButton from '@mui/lab/LoadingButton'
 import { useDispatch } from "react-redux"
-import { setBoards } from "../redux/features/boardSlice"
+import { setBoard } from "../redux/features/boardSlice"
 import { useNavigate } from "react-router-dom"
 import boardApi from "../api/boardApi"
 import { useState } from "react"
@@ -33,7 +33,7 @@ const Home = () => {
         title: 'Untitled Board',
         description: 'Add description here',
       })
-      dispatch(setBoards([res]))
+      dispatch(setBoard([res]))
       navigate(`/boards/${res._id}`)
     } catch (err) {
       alert(err)
