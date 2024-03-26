@@ -1,11 +1,10 @@
 import { Box } from '@mui/material';
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
-// import Loading from '../common/Loading'
-
+import Loading from '../common/Loading';
+import Sidebar from '../common/Sidebar';
 // Dummy components and functions
-const Loading = () => <div>Loading...</div>;
-const Sidebar = () => <div>Sidebar</div>;
+
 
 const AppLayout = () => {
   const [loading, setLoading] = useState(true);
@@ -22,7 +21,7 @@ const AppLayout = () => {
   }, []);
 
   return loading ? (
-    <Loading />
+    <Loading fullHeight />
   ) : (
     <Box sx={{ display: 'flex' }}>
       <Sidebar />

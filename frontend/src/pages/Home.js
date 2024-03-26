@@ -12,20 +12,6 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
 
   
-
-  // const createBoard = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const { data: board } = await boardApi.create(); // Assuming the API returns the board object in the response's data field
-  //     dispatch(setBoards([...board, board]));
-  //     navigate(`/boards/${board._id}`); // Assuming the ID field is named '_id' as is standard in MongoDB
-  //   } catch (err) {
-  //     console.error('Error creating board:', err);
-  //     alert('Error creating board');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
   const createBoard = async () => {
     setLoading(true)
     try {
@@ -47,7 +33,8 @@ const Home = () => {
         Click here to create your first board
       </LoadingButton>
     </Box>
-  )
-}
+  );
+};
+
 
 export default Home
