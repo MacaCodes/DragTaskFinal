@@ -1,56 +1,59 @@
-const express = require('express');
-const { checkBoardExists, checkListExists, checkCardExists } = require('../middlewares/validationMiddleware');
-const cardController = require('../controllers/cardController');
+const router = require('express').Router({ mergeParams: true })
+const { param, body } = require('express-validator')
+const cardController = require('../controllers/card');
 
-const router = express.Router({ mergeParams: true });
+const { checkBoardIdExists, checkListIdExists, checkCardIdExists } = require('../middlewares/validationMiddleware');
 
-router.use('/:cardId', checkCardExists);
-
-router.post('/', [checkBoardExists, checkListExists], cardController.create);
-router.get('/', [checkBoardExists, checkListExists], cardController.getCardsForList);
-router.put('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.update);
-router.delete('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.delete);
-router.patch('/:cardId/position', [checkBoardExists, checkListExists, checkCardExists], cardController.updatePosition);
-router.post('/:cardId', [checkBoardExists, checkListExists, checkCardExists], cardController.updatePosition);
-
-  
-router.post(param('boardId').exists(), // Using express-validator to check if param exists in the request
-  body('listId').exists(), // Using express-validator to check if body param exists
-  checkBoardIdExists, // Your custom middleware to check if boardId exists in the database
+// Create a card
+router.post(
+  '/',
+  param('listId').isMongoId().withMessage('Invalid list ID format'),
+  body('title').isString().isLength({ min: 1 }).withMessage('Title must be at least 1 character long'),
   cardController.create
 );
-// Route to handle retrieving cards for a specific list
+
+// Get a single card
 router.get(
-  '/list/:listId',
-  param('boardId').exists(),
-  param('listId').exists(),
-  checkBoardIdExists,
-  checkListIdExists,
-  cardController.getCardsForList
-);
-router.put(
-  '/update-position',
-  param('boardId').exists(),
-  checkBoardIdExists,
-  cardController.updatePosition
+  '/:cardId',
+  param('cardId').isMongoId().withMessage('Invalid card ID format'),
+  cardController.getOne
 );
 
-router.delete(
-  '/:cardId',
-  param('boardId').exists(),
-  param('cardId').exists(),
-  checkBoardIdExists,
-  checkCardIdExists,
-  cardController.delete
+// Get all cards in a list
+router.get(
+  '/',
+  param('listId').isMongoId().withMessage('Invalid list ID format'),
+  cardController.getAll
 );
 
+// Update a card's details
 router.put(
   '/:cardId',
-  param('boardId').exists(),
-  param('cardId').exists(),
-  checkBoardIdExists,
-  checkCardIdExists,
+  param('cardId').isMongoId().withMessage('Invalid card ID format'),
+  body('title').optional().isString().isLength({ min: 1 }).withMessage('Title must be at least 1 character long'),
+  body('description').optional().isString().withMessage('Description must be a string'),
   cardController.update
 );
 
-module.exports = router
+// Update a card's position
+router.patch(
+  '/:cardId/position',
+  param('cardId').isMongoId().withMessage('Invalid card ID format'),
+  body('newPosition').isNumeric().withMessage('New position must be a number'),
+  cardController.updatePosition
+);
+
+// Delete a card
+router.delete(
+  '/:cardId',
+  param('cardId').isMongoId().withMessage('Invalid card ID format'),
+  cardController.delete
+);
+
+router.get('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.getOne);
+router.get('/', [checkBoardIdExists, checkListIdExists], cardController.getAll);
+router.put('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.update);
+router.patch('/:cardId/position', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.updatePosition);
+router.delete('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.delete);
+
+module.exports = router;

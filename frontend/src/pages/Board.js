@@ -27,14 +27,17 @@ const Board = () => {
         const res = await boardApi.getOne(boardId)
         setTitle(res.title)
         setDescription(res.description)
-        setSections(res.sections)
+        setSections(res.lists)
         setIcon(res.icon)
       } catch (err) {
         alert(err)
       }
     }
-    getBoard()
+    if (boardId) {
+      getBoard()
+    }
   }, [boardId])
+
 
   const onIconChange = async (newIcon) => {
     let temp = [...boards]

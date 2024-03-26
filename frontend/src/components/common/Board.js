@@ -1,38 +1,42 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import List from './List';
-import { addList } from '../redux/actions/boardActions';
+import { useParams } from 'react-router-dom';
+import { Box, Typography, TextField, Button } from '@mui/material';
+import { addList } from '../../redux/features/boardSlice';
+import listApi from '../../api/listApi';
+import Kanban from './Kanban';
 
 const Board = () => {
-    const board = useSelector(state => state.board);
+    const { boardId } = useParams();
+    const board = useSelector((state) => state.board.value.find((board) => board.id === boardId));
     const dispatch = useDispatch();
     const [newListTitle, setNewListTitle] = useState('');
 
-    const handleAddList = () => {
-        dispatch(addList({ boardId: board.id, title: newListTitle }));
-        setNewListTitle('');
+    const handleAddList = async () => {
+        try {
+            const res = await listApi.create(boardId, { title: newListTitle });
+            dispatch(addList(res));
+            setNewListTitle('');
+        } catch (err) {
+            alert(err);
+        }
     };
 
     return (
-        <div>
-            <h1>{board.title}</h1>
+        <Box>
+            <Typography variant="h4">{board.title}</Typography>
             {/* Render any other board-level information */}
-            <div>
-                {board.lists.map(list => (
-                    <List key={list.id} list={list} />
-                ))}
-            </div>
-            <div>
-                <input
-                    type="text"
+            <Kanban data={board.lists} boardId={boardId} />
+            <Box>
+                <TextField
                     value={newListTitle}
-                    onChange={e => setNewListTitle(e.target.value)}
+                    onChange={(e) => setNewListTitle(e.target.value)}
                     placeholder="Enter list title"
                 />
-                <button onClick={handleAddList}>Add List</button>
-            </div>
+                <Button onClick={handleAddList}>Add List</Button>
+            </Box>
             {/* Handle other board-specific actions or events */}
-        </div>
+        </Box>
     );
 };
 
