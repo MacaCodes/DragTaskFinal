@@ -48,7 +48,7 @@ const Sidebar = () => {
         dispatch(setBoard(newList))
 
         try {
-            await boardApi.updatePositoin({ boards: newList })
+            await boardApi.updatePosition({ boards: newList })
         } catch (err) {
             alert(err)
         }
