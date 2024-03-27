@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Backdrop, Box, Button,  Divider, Fade, IconButton, Modal, TextField, Typography } from '@mui/material';
+import { Backdrop, Box, Button, Divider, Fade, IconButton, Modal, TextField, Typography } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import Moment from 'moment';
 import cardApi from '../../api/cardApi';
 // import SaveButtonSaveCard from './SaveButtonSaveCard';
-import { CKEditor } from '@ckeditor/ckeditor5-react'  
+import { CKEditor } from '@ckeditor/ckeditor5-react'
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic'
 
 import '../../css/custom-editor.css'
@@ -27,23 +27,20 @@ const modalStyle = {
 let timer;
 const timeout = 500;
 let isModalClosed = false
-const CardModal = props => {
-  const boardId = props.boardId;
-  const [card, setCard] = useState(props.card);
-  const [title, setTitle] = useState( '');
-  const [content, setContent] = useState('');
+const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
+  const [title, setTitle] = useState(card?.title || '');
+  const [content, setContent] = useState(card?.content || '');
   const editorWrapperRef = useRef()
 
   useEffect(() => {
-    setCard(props.card)
-    setTitle(props.card !== undefined ? props.card.title : '');
-    setContent(props.card !== undefined ? props.card.content : '');
-    if (props.card !== undefined) {
+    setTitle(card?.title || '');
+    setContent(card?.content || '');
+    if (card !== undefined) {
       isModalClosed = false
 
       updateEditorHeight()
-      }
-  }, [props.card]);
+    }
+  }, [card]);
 
 
   const updateEditorHeight = () => {
@@ -56,136 +53,233 @@ const CardModal = props => {
   }
   const onClose = () => {
     isModalClosed = true
-    props.onUpdate(card)
-    props.onClose();
+    onUpdate(card)
+    onClose();
   }
 
   const deleteCard = async () => {
     try {
       await cardApi.delete(boardId, card.id);
-      props.onDelete(card);
+      onDelete(card);
       onClose();
     } catch (error) {
       console.error('Error deleting card:', error);
       alert('Error deleting card');
-      }
     }
+  }
 
-    
-    const updateTitle = async (e) => {
-      clearTimeout(timer)
-      const newTitle = e.target.value
-      timer = setTimeout(async () => {
-        try {
-          await cardApi.update(boardId, card.id, { title: newTitle })
-        } catch (err) {
-          alert(err)
-        }
-      }, timeout)
-  
-      card.title = newTitle
-      setTitle(newTitle)
-      props.onUpdate(card)
+  const handleUpdate = async () => {
+    try {
+      const updatedCard = { ...card, title, content };
+      await cardApi.update(boardId, card.id, updatedCard);
+      onUpdate(updatedCard);
+      onClose();
+    } catch (error) {
+      console.error('Error updating card:', error);
+      alert('Error updating card');
     }
-  
-    const updateContent = async (event, editor) => {
-      clearTimeout(timer)
-      const data = editor.getData()
-  
-      console.log({ isModalClosed })
-  
-      if (!isModalClosed) {
-        timer = setTimeout(async () => {
-          try {
-            await cardApi.update(boardId, card.id, { content: data })
-          } catch (err) {
-            alert(err)
-          }
-        }, timeout);
-  
-        card.content = data
-        setContent(data)
-        props.onUpdate(card)
-      }
-    }
-  
+  };
+  const updateTitle = (e) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    clearTimeout(window.titleTimer);
+    window.titleTimer = setTimeout(() => {
+      handleUpdate();
+    }, timeout);
+  };
+
+
+
+  const updateContent = async (event, editor) => {
+    const data = editor.getData();
+    setContent(data);
+    clearTimeout(window.contentTimer);
+    window.contentTimer = setTimeout(() => {
+      handleUpdate();
+    }, timeout);
+  };
 
   return (
     <>
-    <Modal
-      open={card !== undefined}
-      onClose={onClose}
-      closeAfterTransition
-      BackdropComponent={Backdrop}
-      BackdropProps={{ timeout: 500 }}
-    >
-      <Fade in={!!card}>
-        <Box sx={modalStyle}>
-        <Box sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-            width: '100%'
-          }}>
-          <IconButton variant='outlined' color='error' onClick={deleteCard}>
-            <DeleteOutlinedIcon />
-          </IconButton>
-          </Box>
-          <Box sx={{
-            display: 'flex',
-            height: '100%',
-            flexDirection: 'column',
-            padding: '2rem 5rem 5rem'
-          }}>
-          <TextField
-              value={title}
-              onChange={updateTitle}
-              placeholder='Untitled'
-              variant='outlined'
-              fullWidth
-              sx={{
-                width: '100%',
-                '& .MuiOutlinedInput-input': { padding: 0 },
-                '& .MuiOutlinedInput-notchedOutline': { border: 'unset ' },
-                '& .MuiOutlinedInput-root': { fontSize: '2.5rem', fontWeight: '700' },
-                marginBottom: '10px'
-              }}
-            />
-            <Typography variant='body2' fontWeight='700'>
-          {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
-        </Typography>
-        <Divider sx={{ margin: '1.5rem 0' }} />
-        <Box
-          ref={editorWrapperRef}
-          sx={{
-            position: 'relative',
-            height: '80%',
-            overflowX: 'hidden',
-            overflowY: 'auto'
-          }}
-        >
-            <CKEditor
-                editor={ClassicEditor}
-                data={content}
-                onChange={(e) => setContent(e.editor.getData())} 
+      <Modal
+        open={card !== undefined}
+        onClose={onClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{ timeout: 500 }}
+      >
+        <Fade in={!!card}>
+          <Box sx={modalStyle}>
+            <Box sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              width: '100%'
+            }}>
+              <IconButton sx={{ position: 'absolute', right: 8, top: 8 }} color="error" onClick={deleteCard}>
+                <DeleteOutlinedIcon />
+              </IconButton>
+            </Box>
+            <Box sx={{ padding: '2rem', overflowY: 'auto' }}>
+              <TextField
+                label="Title"
+                value={title}
+                onChange={updateTitle}
+                fullWidth
+                variant="outlined"
+                sx={{ mb: 2 }}
               />
+              
+              <Box
+                ref={editorWrapperRef}
+                sx={{
+                  position: 'relative',
+                  height: '80%',
+                  overflowX: 'hidden',
+                  overflowY: 'auto'
+                }}
+              >              <Divider sx={{ margin: '1.5rem 0' }} />
+                <CKEditor
+                  editor={ClassicEditor}
+                  data={content}
+                  onChange={updateContent}
+                />              <Divider sx={{ margin: '1.5rem 0' }} />
+<Typography variant='body2' fontWeight='700'>
+                {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
+              </Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+                  <Button color="secondary" onClick={onClose}>Cancel</Button>
+                  <Button sx={{ ml: 1 }} color="primary" onClick={handleUpdate}>Save Changes</Button>
+                </Box>
               </Box>
-          <Divider sx={{ margin: '1rem 0' }} />
-          <Typography variant='body2'>
-            {card ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
-          </Typography>
-          <Box display="flex" justifyContent="flex-end" marginTop="auto">
-            <Button onClick={updateContent} color="primary">Save Changes</Button>
-            <Button onClick={onClose} color="secondary">Cancel</Button>
+            </Box>
           </Box>
-          </Box>
-        </Box>
         </Fade>
-    </Modal>
-  </>
+
+      </Modal>
+    </>
 
   );
 };
 
 export default CardModal;
 
+// import React, { useEffect,  useState } from 'react';
+// import { Backdrop, Box, Button, Divider, Fade, IconButton, Modal, TextField, Typography } from '@mui/material';
+// import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
+// import Moment from 'moment';
+// import cardApi from '../../api/cardApi';
+// import { CKEditor } from '@ckeditor/ckeditor5-react';
+// import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+// import '../../css/custom-editor.css';
+
+// const modalStyle = {
+//   outline: 'none',
+//   position: 'absolute',
+//   top: '50%',
+//   left: '50%',
+//   transform: 'translate(-50%, -50%)',
+//   width: '50%',
+//   bgcolor: 'background.paper',
+//   border: '0px solid #000',
+//   boxShadow: 24,
+//   p: 1,
+//   height: '80%',
+// };
+
+// const timeout = 500;
+
+// const CardModal = ({ boardId, card, onClose, onUpdate, onDelete }) => {
+//   const [title, setTitle] = useState(card?.title || '');
+//   const [content, setContent] = useState(card?.content || '');
+//   // const editorWrapperRef = useRef();
+
+//   useEffect(() => {
+//     setTitle(card?.title || '');
+//     setContent(card?.content || '');
+//   }, [card]);
+
+//   const deleteCard = async () => {
+//     try {
+//       await cardApi.delete(boardId, card.id);
+//       onDelete(card);
+//       onClose();
+//     } catch (error) {
+//       console.error('Error deleting card:', error);
+//       alert('Error deleting card');
+//     }
+//   };
+
+//   const handleUpdate = async () => {
+//     try {
+//       const updatedCard = { ...card, title, content };
+//       await cardApi.update(boardId, card.id, updatedCard);
+//       onUpdate(updatedCard);
+//       onClose();
+//     } catch (error) {
+//       console.error('Error updating card:', error);
+//       alert('Error updating card');
+//     }
+//   };
+
+//   const updateTitle = (e) => {
+//     const newTitle = e.target.value;
+//     setTitle(newTitle);
+//     clearTimeout(window.titleTimer);
+//     window.titleTimer = setTimeout(() => {
+//       handleUpdate();
+//     }, timeout);
+//   };
+
+//   const updateContent = (event, editor) => {
+//     const data = editor.getData();
+//     setContent(data);
+//     clearTimeout(window.contentTimer);
+//     window.contentTimer = setTimeout(() => {
+//       handleUpdate();
+//     }, timeout);
+//   };
+
+//   return (
+//     <Modal
+//       open={!!card}
+//       onClose={onClose}
+//       closeAfterTransition
+//       BackdropComponent={Backdrop}
+//       BackdropProps={{ timeout: 500 }}
+//     >
+//       <Fade in={!!card}>
+//         <Box sx={modalStyle}>
+//           <IconButton sx={{ position: 'absolute', right: 8, top: 8 }} color="error" onClick={deleteCard}>
+//             <DeleteOutlinedIcon />
+//           </IconButton>
+//           <Box sx={{ padding: '2rem', overflowY: 'auto' }}>
+//             <TextField
+//               label="Title"
+//               value={title}
+//               onChange={updateTitle}
+//               fullWidth
+//               variant="outlined"
+//               sx={{ mb: 2 }}
+//             />
+//             <Typography variant="body2" sx={{ mb: 2 }}>
+//               {Moment(card?.createdAt).format('YYYY-MM-DD')}
+//             </Typography>
+//             <Divider sx={{ mb: 2 }} />
+//             <CKEditor
+//               editor={ClassicEditor}
+//               data={content}
+//               onChange={updateContent}
+//             />
+//             <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
+//               <Button color="secondary" onClick={onClose}>Cancel</Button>
+//               <Button sx={{ ml: 1 }} color="primary" onClick={handleUpdate}>Save Changes</Button>
+//             </Box>
+//           </Box>
+//         </Box>
+//       </Fade>
+//     </Modal>
+//   );
+// };
+
+// export default CardModal;
