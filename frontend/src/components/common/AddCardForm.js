@@ -7,12 +7,9 @@ const AddCardForm = ({ onClose, onAddCard }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Perform form validation here if needed
 
-    // Dispatch action to add card
     onAddCard({ title, description });
 
-    // Close the modal
     onClose();
   };
 

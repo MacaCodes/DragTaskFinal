@@ -3,9 +3,9 @@ import { Box, Typography, IconButton, Dialog, DialogTitle, DialogContent, Dialog
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditIcon from '@mui/icons-material/Edit';
 
-const Card = ({ cardData, onDelete }) => {
+const Card = ({ cardData, onDelete, onUpdateContent }) => {
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(cardData.title);
+  const [editedContent, setEditedContent] = useState(cardData.content || '');
 
   const handleEditOpen = () => {
     setIsEditOpen(true);
@@ -16,8 +16,8 @@ const Card = ({ cardData, onDelete }) => {
   };
 
   const handleEditSave = () => {
-    // Save edited title to the parent component or perform any other action
-    console.log("Edited title:", editedTitle);
+    // Save edited content to the parent component or perform any other action
+    onUpdateContent(cardData.id, editedContent);
     setIsEditOpen(false);
   };
 
@@ -42,6 +42,9 @@ const Card = ({ cardData, onDelete }) => {
       <Typography variant="body2">{cardData.dueDate}</Typography>
       {/* Render other card details as needed */}
 
+      {/* Content */}
+      <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>{cardData.content}</Typography>
+
       {/* Edit button */}
       <IconButton onClick={handleEditOpen} sx={{ color: 'primary', marginRight: '8px' }}>
         <EditIcon />
@@ -54,16 +57,17 @@ const Card = ({ cardData, onDelete }) => {
 
       {/* Edit Dialog */}
       <Dialog open={isEditOpen} onClose={handleEditClose}>
-        <DialogTitle>Edit Card Title</DialogTitle>
+        <DialogTitle>Edit Card Content</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Title"
+            label="Content"
             type="text"
             fullWidth
-            value={editedTitle}
-            onChange={(e) => setEditedTitle(e.target.value)}
+            multiline
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
