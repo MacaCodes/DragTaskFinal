@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Backdrop, Box, Button, Divider, Fade, IconButton, Modal, TextField, Typography } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import Moment from 'moment';
@@ -24,38 +24,31 @@ const modalStyle = {
   height: '80%',
 };
 
-let timer;
-const timeout = 500;
-let isModalClosed = false
-const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
+const timeout = 5000;
+const CardModal = ({ boardId, card, onUpdate, onDelete, onClose }) => {
   const [title, setTitle] = useState(card?.title || '');
   const [content, setContent] = useState(card?.content || '');
-  const editorWrapperRef = useRef()
 
   useEffect(() => {
-    setTitle(card?.title || '');
-    setContent(card?.content || '');
-    if (card !== undefined) {
-      isModalClosed = false
-
-      updateEditorHeight()
+    if (card) {
+      setTitle(card.title || '');
+      setContent(card.content || '');
     }
   }, [card]);
 
 
-  const updateEditorHeight = () => {
-    setTimeout(() => {
-      if (editorWrapperRef.current) {
-        const box = editorWrapperRef.current
-        box.querySelector('.ck-editor__editable_inline').style.height = (box.offsetHeight - 50) + 'px'
-      }
-    }, timeout)
-  }
-  const onClose = () => {
-    isModalClosed = true
-    onUpdate(card)
-    onClose();
-  }
+  // const updateEditorHeight = () => {
+  //   setTimeout(() => {
+  //     if (editorWrapperRef.current) {
+  //       const box = editorWrapperRef.current
+  //       box.querySelector('.ck-editor__editable_inline').style.height = (box.offsetHeight - 50) + 'px'
+  //     }
+  //   }, timeout)
+  // }
+  // const onClose = () => {
+  //   onUpdate(card)
+  //   onClose();
+  // }
 
   const deleteCard = async () => {
     try {
@@ -69,8 +62,8 @@ const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
   }
 
   const handleUpdate = async () => {
+    const updatedCard = { ...card, title, content };
     try {
-      const updatedCard = { ...card, title, content };
       await cardApi.update(boardId, card.id, updatedCard);
       onUpdate(updatedCard);
       onClose();
@@ -99,10 +92,15 @@ const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
     }, timeout);
   };
 
+  const handleClose = () => {
+    onUpdate(card)
+    onClose();
+  }
+
   return (
     <>
       <Modal
-        open={card !== undefined}
+        open={!!card}
         onClose={onClose}
         closeAfterTransition
         BackdropComponent={Backdrop}
@@ -121,7 +119,7 @@ const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
               </IconButton>
             </Box>
             <Box sx={{ padding: '2rem', overflowY: 'auto' }}>
-              <TextField
+              <TextField id
                 label="Title"
                 value={title}
                 onChange={updateTitle}
@@ -131,7 +129,6 @@ const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
               />
               
               <Box
-                ref={editorWrapperRef}
                 sx={{
                   position: 'relative',
                   height: '80%',
@@ -148,7 +145,7 @@ const CardModal = ({ boardId, card, onUpdate, onDelete }) => {
                 {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
               </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-                  <Button color="secondary" onClick={onClose}>Cancel</Button>
+                  <Button color="secondary" onClick={handleClose}>Cancel</Button>
                   <Button sx={{ ml: 1 }} color="primary" onClick={handleUpdate}>Save Changes</Button>
                 </Box>
               </Box>

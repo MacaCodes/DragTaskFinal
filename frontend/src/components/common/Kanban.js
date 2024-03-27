@@ -14,6 +14,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import listApi from "../../api/listApi";
 import cardApi from "../../api/cardApi";
 import CardModal from "./CardModal";
+// import list from "../../../../backend/src/v1/models/list";
 
 let timer;
 const timeout = 500;
@@ -113,17 +114,20 @@ const Kanban = (props) => {
     }
   };
 
-  const onUpdateCard = (card) => {
+  const onUpdateCard = (updatedCard) => {
     const newData = [...data];
-    const listIndex = newData.findIndex(e => e.id === card.id);
-    const cardIndex = newData[listIndex].cards.findIndex(e => e.id === card.id)
-    newData[listIndex].cards[cardIndex] = card
+    const listIndex = newData.findIndex(list => list.id === updatedCard.listId);
+    if (listIndex === -1) return;
+
+    const cardIndex = newData[listIndex].cards.findIndex(card => card.id === updatedCard.id)
+    if (cardIndex === -1) return;
+    newData[listIndex].cards[cardIndex] = updatedCard;
     setData(newData)
   }
 
   const onDeleteCard = (card) => {
     const newData = [...data];
-    const listIndex = newData.findIndex(e => e.id === card.id);
+    const listIndex = newData.findIndex(list => list.id === card.listId);
     const cardIndex = newData[listIndex].cards.findIndex(
       (e) => e.id === card.id
     );
