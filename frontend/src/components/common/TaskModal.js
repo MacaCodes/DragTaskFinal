@@ -80,10 +80,19 @@ const TaskModal = (props) => {
   const updateContent = (e) => {
     const data = e.target.value;
     setContent(data);
+<<<<<<< Updated upstream:frontend/src/components/common/TaskModal.js
     // Update the task content in local state
     task.content = data;
     props.onUpdate(task);
   };
+=======
+    // Update the card content in local state
+    card.content = data;
+    if (typeof props.onUpdate === 'function') {
+      props.onUpdate(card);
+    }
+      };
+>>>>>>> Stashed changes:frontend/src/components/common/CardModal.js
 
   return (
     <Modal

@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 import { Backdrop, Fade, IconButton, Modal, Box, TextField, Typography, Divider } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined'
@@ -170,5 +171,49 @@ const TaskModal = props => {
     </Modal>
   )
 }
+=======
+import React, { useState } from 'react';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
+import List from './List';
+import AddListButton from './AddListButton';
+import { Box } from '@mui/material';
+import { v4 as uuidv4 } from 'uuid';
+
+const Kanban = ({ data, boardId }) => {
+  const [lists, setLists] = useState(data);
+
+  const onDragEnd = (result) => {
+  };
+
+  const addList = () => {
+    const newList = { id: uuidv4(), title: 'New List', cards: [] };
+    setLists([...lists, newList]);
+  };
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="board" direction="horizontal" type="LIST">
+        {(provided) => (
+          <Box
+            sx={{
+              display: 'flex',
+              overflowX: 'auto',
+              padding: '10px',
+            }}
+            {...provided.droppableProps}
+            ref={provided.innerRef}
+          >
+            {lists.map((list, index) => (
+              <List key={list.id} list={list} index={index} boardId={boardId} />
+            ))}
+            {provided.placeholder}
+            <AddListButton onClick={addList} />
+          </Box>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+};
+>>>>>>> Stashed changes
 
 export default TaskModal

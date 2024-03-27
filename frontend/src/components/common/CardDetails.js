@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField } from '@mui/material';
 
 const CardDetails = ({ cardData, onClose, onUpdate }) => {
+  const [editable, setEditable] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState(cardData.title);
   const [updatedDescription, setUpdatedDescription] = useState(cardData.description);
 
@@ -19,24 +20,33 @@ const CardDetails = ({ cardData, onClose, onUpdate }) => {
           <DialogContent>
             <TextField
               label="Title"
-              value={updatedTitle}
+              value={editable ? updatedTitle : cardData.title}
               onChange={(e) => setUpdatedTitle(e.target.value)}
               fullWidth
               margin="normal"
+              disabled={!editable}
             />
             <TextField
               label="Description"
-              value={updatedDescription}
+              value={editable ? updatedDescription : cardData.description}
               onChange={(e) => setUpdatedDescription(e.target.value)}
               multiline
               fullWidth
               margin="normal"
+              disabled={!editable}
             />
             {/* Render other card details as needed */}
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleUpdate} color="primary">Update</Button>
-            <Button onClick={onClose} color="secondary">Cancel</Button>
+            {!editable && (
+              <Button onClick={() => setEditable(true)} color="primary">Edit</Button>
+            )}
+            {editable && (
+              <>
+                <Button onClick={handleUpdate} color="primary">Update</Button>
+                <Button onClick={() => setEditable(false)} color="secondary">Cancel</Button>
+              </>
+            )}
           </DialogActions>
         </>
       )}
