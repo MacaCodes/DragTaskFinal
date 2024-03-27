@@ -15,18 +15,9 @@ const Home = () => {
   const createBoard = async () => {
     setLoading(true)
     try {
-<<<<<<< Updated upstream
-      const res = await boardApi.create({
-        title: 'Untitled Board',
-        description: 'Add description here',
-      })
-      dispatch(setBoard([res]))
-      navigate(`/boards/${res._id}`)
-=======
       const { data: board } = await boardApi.create(); 
-      dispatch(setBoards([...board, board]));
+      dispatch(setBoard([...board, board]));
       navigate(`/boards/${board._id}`); 
->>>>>>> Stashed changes
     } catch (err) {
       alert(err)
     } finally {
