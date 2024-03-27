@@ -31,9 +31,9 @@ const CardModal = (props) => {
 
   useEffect(() => {
     setCard(props.card);
-    setTitle(props.card !== undefined ? props.card.title : '');
-    setContent(props.card !== undefined ? props.card.content : '');
-    if (props.card !== undefined) {
+    setTitle(props.card ? props.card.title : ''); // Null check for props.card
+    setContent(props.card ? props.card.content : ''); // Null check for props.card
+    if (props.card) { // Null check for props.card
       isModalClosed = false;
       updateEditorHeight();
     }
@@ -49,11 +49,13 @@ const CardModal = (props) => {
   };
 
   const onClose = () => {
-    isModalClosed = true;
-    props.onUpdate(card);
+    if (card) { // Check if card is not null or undefined
+      isModalClosed = true;
+      props.onUpdate(card);
+    }
     props.onClose();
   };
-
+  
  // Delete card function
 const deleteCard = async () => {
   try {
@@ -72,8 +74,8 @@ const deleteCard = async () => {
     clearTimeout(timer);
     timer = setTimeout(async () => {
       try {
-        await cardApi.update(boardId, card.id, { title: newTitle });
-        card.title = newTitle;
+        await cardApi.update(boardId, card.id, { title: title });
+        card.title = title;
         props.onUpdate(card);
       } catch (error) {
         alert('Error updating card title');

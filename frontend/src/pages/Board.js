@@ -42,15 +42,14 @@ const Board = () => {
     const newTitle = e.target.value;
     setTitle(newTitle);
 
-    dispatch(setBoard({ ...board, title: newTitle }));
+    dispatch(setBoard({ ...board, title: title }));
 
-    timer = setTimeout(async () => {
+
       try {
-        await boardApi.update(boardId, { title: newTitle });
+        await boardApi.update(boardId, { title: title });
       } catch (err) {
         alert(err);
       }
-    }, timeout);
   };
 
   const updateDescription = async (e) => {
@@ -59,7 +58,7 @@ const Board = () => {
     setDescription(newDescription);
     timer = setTimeout(async () => {
       try {
-        await boardApi.update(boardId, { description: newDescription });
+        await boardApi.update(boardId, { description: description });
       } catch (err) {
         alert(err);
       }
@@ -94,7 +93,7 @@ const Board = () => {
         <Box>
           <TextField
             value={title}
-            onChange={updateTitle}
+            onChange= {(e) => updateTitle(e)}
             placeholder="Untitled"
             variant="outlined"
             fullWidth

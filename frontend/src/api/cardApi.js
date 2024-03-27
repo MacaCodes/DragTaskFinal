@@ -5,8 +5,7 @@ const cardApi = {
   updatePosition: (boardId, params) => axiosClient.put(`boards/${boardId}/cards/update-position`, params),
   // updateFavourite: (boardId, params) => axiosClient.put(`boards/${boardId}/cards/update-favourite`, params),
   delete: (boardId, cardId) => axiosClient.delete(`boards/${boardId}/cards/${cardId}`),
-
   update: (boardId, cardId, params) => axiosClient.put(`boards/${boardId}/cards/${cardId}`, params),
 }
 
-export default cardApi
+export default cardApi;

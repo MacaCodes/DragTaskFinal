@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -7,16 +8,12 @@ import {
   IconButton,
   Card,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import listApi from "../../api/listApi";
 import cardApi from "../../api/cardApi";
 import CardModal from "./CardModal";
-
-let timer;
-const timeout = 500;
 
 const Kanban = (props) => {
   const boardId = props.boardId;
@@ -45,22 +42,22 @@ const Kanban = (props) => {
     if (source.droppableId !== destination.droppableId) {
       const [removed] = sourceCards.splice(source.index, 1);
       destinationCards.splice(destination.index, 0, removed);
-      data[sourceColIndex].cards = sourceCards;
-      data[destinationColIndex].cards = destinationCards;
     } else {
       const [removed] = destinationCards.splice(source.index, 1);
       destinationCards.splice(destination.index, 0, removed);
-      data[destinationColIndex].cards = destinationCards;
     }
 
     try {
       await cardApi.updatePosition(boardId, {
-        resourceList: sourceCards,
-        destinationList: destinationCards,
-        resourceListId: sourceListId,
-        destinationListId: destinationListId,
+        sourceCards,
+        destinationCards,
+        sourceListId,
+        destinationListId,
       });
-      setData(data);
+      const newData = [...data];
+      newData[sourceColIndex].cards = sourceCards;
+      newData[destinationColIndex].cards = destinationCards;
+      setData(newData);
     } catch (err) {
       alert(err);
     }
@@ -78,7 +75,7 @@ const Kanban = (props) => {
   const deleteList = async (listId) => {
     try {
       await listApi.delete(boardId, listId);
-      const newData = [...data].filter((e) => e.id !== listId);
+      const newData = data.filter((e) => e.id !== listId);
       setData(newData);
     } catch (err) {
       alert(err);
@@ -86,19 +83,16 @@ const Kanban = (props) => {
   };
 
   const updateListTitle = async (e, listId) => {
-    clearTimeout(timer);
     const newTitle = e.target.value;
     const newData = [...data];
     const index = newData.findIndex((e) => e.id === listId);
     newData[index].title = newTitle;
     setData(newData);
-    timer = setTimeout(async () => {
-      try {
-        await listApi.update(boardId, listId, { title: newTitle });
-      } catch (err) {
-        alert(err);
-      }
-    }, timeout);
+    try {
+      await listApi.update(boardId, listId, { title: newTitle });
+    } catch (err) {
+      alert(err);
+    }
   };
 
   const createCard = async (listId) => {
@@ -113,23 +107,29 @@ const Kanban = (props) => {
     }
   };
 
-  const onUpdateCard = (card) => {
-    const newData = [...data];
-    const listIndex = newData.findIndex((e) => e.id === card.list.id);
-    const cardIndex = newData[listIndex].cards.findIndex(
-      (e) => e.id === card.id
-    );
-    newData[listIndex].cards[cardIndex] = card;
+  const onUpdateCard = (updatedCard) => {
+    const newData = data.map((list) => {
+      if (list.id === updatedCard.list.id) {
+        const updatedCards = list.cards.map((card) =>
+          card.id === updatedCard.id ? updatedCard : card
+        );
+        return { ...list, cards: updatedCards };
+      }
+      return list;
+    });
     setData(newData);
   };
 
-  const onDeleteCard = (card) => {
-    const newData = [...data];
-    const listIndex = newData.findIndex((e) => e.id === card.list.id);
-    const cardIndex = newData[listIndex].cards.findIndex(
-      (e) => e.id === card.id
-    );
-    newData[listIndex].cards.splice(cardIndex, 1);
+  const onDeleteCard = (deletedCard) => {
+    const newData = data.map((list) => {
+      if (list.id === deletedCard.list.id) {
+        const updatedCards = list.cards.filter(
+          (card) => card.id !== deletedCard.id
+        );
+        return { ...list, cards: updatedCards };
+      }
+      return list;
+    });
     setData(newData);
   };
 
@@ -159,7 +159,8 @@ const Kanban = (props) => {
         >
           {data.map((list) => (
             <div key={list.id} style={{ width: "300px" }}>
-              <Droppable key={list.id} droppableId={list.id}>
+              <
+              Droppable key={list.id} droppableId={list.id}>
                 {(provided) => (
                   <Box
                     ref={provided.innerRef}
@@ -234,35 +235,35 @@ const Kanban = (props) => {
                               padding: "10px",
                               marginBottom: "10px",
                               cursor: snapshot.isDragging
-                                ? "grab"
-                                : "pointer!important",
-                            }}
-                            onClick={() => setSelectedCard(card)}
-                          >
-                            <Typography>
-                              {card.title === "" ? "Untitled" : card.title}
-                            </Typography>
-                          </Card>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </Box>
-                )}
-              </Droppable>
-            </div>
-          ))}
-        </Box>
-      </DragDropContext>
-      <CardModal
-        card={selectedCard}
-        boardId={boardId}
-        onClose={() => setSelectedCard(undefined)}
-        onUpdate={onUpdateCard}
-        onDelete={onDeleteCard}
-      />
-    </>
-  );
+                              ? "grab"
+                              : "pointer!important",
+                          }}
+                          onClick={() => setSelectedCard(card)}
+                        >
+                          <Typography>
+                            {card.title === "" ? "Untitled" : card.title}
+                          </Typography>
+                        </Card>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </Box>
+              )}
+            </Droppable>
+          </div>
+        ))}
+      </Box>
+    </DragDropContext>
+    <CardModal
+      card={selectedCard}
+      boardId={boardId}
+      onClose={() => setSelectedCard(undefined)}
+      onUpdate={onUpdateCard}
+      onDelete={onDeleteCard}
+    />
+  </>
+);
 };
 
 export default Kanban;

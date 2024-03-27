@@ -112,7 +112,8 @@ const Sidebar = () => {
                     <Droppable key={'list-board-droppable-key'} droppableId={'list-board-droppable'}>
                         {(provided) => (
                             <div ref={provided.innerRef} {...provided.droppableProps}>
-                                {board.map((item, index) => (
+                                {board &&
+                                board.map((item, index) => (
                                     <Draggable key={item._id} draggableId={item._id} index={index}>
                                         {(provided, snapshot) => (
                                             <ListItemButton
@@ -141,7 +142,8 @@ const Sidebar = () => {
                                             </ListItemButton>
                                         )}
                                     </Draggable>
-                                ))}
+                                ))}  
+
                                 {provided.placeholder}
                             </div>
                         )}

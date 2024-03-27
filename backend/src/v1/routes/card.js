@@ -53,7 +53,7 @@ router.delete(
 router.get('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.getOne);
 router.get('/', [checkBoardIdExists, checkListIdExists], cardController.getAll);
 router.put('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.update);
-router.patch('/:cardId/position', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.updatePosition);
+router.put('/:cardId/position', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.updatePosition);
 router.delete('/:cardId', [checkBoardIdExists, checkListIdExists, checkCardIdExists], cardController.delete);
 
 module.exports = router;
