@@ -2,7 +2,8 @@ import axiosClient from './axiosClient'
 
 const cardApi = {
   create: (boardId, params) => axiosClient.post(`boards/${boardId}/cards`, params),
-  updatePosition: (boardId, params) => axiosClient.put(`boards/${boardId}/cards/update-position`, params),
+  updatePosition: (boardId, params) => axiosClient.put(
+    `boards/${boardId}/cards/update-position`, params),
   // updateFavourite: (boardId, params) => axiosClient.put(`boards/${boardId}/cards/update-favourite`, params),
   delete: (boardId, cardId) => axiosClient.delete(`boards/${boardId}/cards/${cardId}`),
 

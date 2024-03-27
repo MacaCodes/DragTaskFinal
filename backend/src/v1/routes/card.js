@@ -25,23 +25,42 @@ router.get(
   param('listId').isMongoId().withMessage('Invalid list ID format'),
   cardController.getAll
 );
-
 // Update a card's details
-router.put(
+router.patch(
   '/:cardId',
   param('cardId').isMongoId().withMessage('Invalid card ID format'),
   body('title').optional().isString().isLength({ min: 1 }).withMessage('Title must be at least 1 character long'),
   body('description').optional().isString().withMessage('Description must be a string'),
   cardController.update
-);
-
+  );
+  
+  router.put(
+    '/update-position',
+    param('boardId').custom(value => {
+      if (!validation.isObjectId(value)) {
+        return Promise.reject('invalid board id')
+      } else return Promise.resolve()
+    }),
+  
+    cardController.updatePosition
+  );
+  // router.put(
+  //   '/:cardId/update-position',
+  //   param('boardId').custom(value => {
+  //     if (!validation.isObjectId(value)) {
+  //       return Promise.reject('invalid board id')
+  //     } else return Promise.resolve()
+  //   }),
+  
+  //   cardController.updatePosition
+  // )
 // Update a card's position
-router.patch(
-  '/:cardId/position',
-  param('cardId').isMongoId().withMessage('Invalid card ID format'),
-  body('newPosition').isNumeric().withMessage('New position must be a number'),
-  cardController.updatePosition
-);
+// router.put(
+//   '/update-position',
+//   param('boardId').isMongoId().withMessage('Invalid board ID format'),
+//   body('newPosition').isNumeric().withMessage('New position must be a number'),
+//   cardController.updatePosition
+// );
 
 // Delete a card
 router.delete(
