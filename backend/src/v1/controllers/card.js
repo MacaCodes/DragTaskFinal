@@ -47,7 +47,8 @@ exports.getAll = async (req, res) => {
 exports.update = async (req, res) => {
   const { cardId } = req.params;
   try {
-    const card = await Card.findByIdAndUpdate(cardId,
+    const card = await Card.findByIdAndUpdate(
+      cardId,
       { $set: req.body },
     )
     res.status(200).json(card);

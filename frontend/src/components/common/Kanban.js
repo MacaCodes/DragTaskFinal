@@ -105,7 +105,7 @@ const Kanban = (props) => {
     try {
       const card = await cardApi.create(boardId, { listId });
       const newData = [...data];
-      const index = newData.findIndex((e) => e.id === listId);
+      const index = newData.findIndex(e => e.id === listId);
       newData[index].cards.unshift(card);
       setData(newData);
     } catch (err) {
@@ -115,17 +115,15 @@ const Kanban = (props) => {
 
   const onUpdateCard = (card) => {
     const newData = [...data];
-    const listIndex = newData.findIndex((e) => e.id === card.list.id);
-    const cardIndex = newData[listIndex].cards.findIndex(
-      (e) => e.id === card.id
-    );
-    newData[listIndex].cards[cardIndex] = card;
-    setData(newData);
-  };
+    const listIndex = newData.findIndex(e => e.id === card.id);
+    const cardIndex = newData[listIndex].cards.findIndex(e => e.id === card.id)
+    newData[listIndex].cards[cardIndex] = card
+    setData(newData)
+  }
 
   const onDeleteCard = (card) => {
     const newData = [...data];
-    const listIndex = newData.findIndex((e) => e.id === card.list.id);
+    const listIndex = newData.findIndex(e => e.id === card.id);
     const cardIndex = newData[listIndex].cards.findIndex(
       (e) => e.id === card.id
     );

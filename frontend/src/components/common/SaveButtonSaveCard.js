@@ -1,17 +1,18 @@
 import React from 'react';
-import { Button } from '@mui/material'; // Assuming you're using Material-UI
+import { Button } from '@mui/material';
 
-const Card = ({ onSave }) => {
+const SaveButtonSaveCard = ({ onSave }) => {
   const handleSave = () => {
-    // Call the onSave function passed as a prop
-    if (onSave) {
+    if (typeof onSave === 'function') {
+
       onSave();
     }
   };
 
   return (
-    <div>
-      {/* Card content */}
+
+    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+
       <Button variant="contained" color="primary" onClick={handleSave}>
         Save
       </Button>
@@ -19,4 +20,5 @@ const Card = ({ onSave }) => {
   );
 };
 
-export default Card;
+export default SaveButtonSaveCard;
+
