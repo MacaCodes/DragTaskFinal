@@ -3,68 +3,54 @@ import React, { useEffect, useRef, useState } from 'react';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import Moment from 'moment';
 import cardApi from '../../api/cardApi';
+import { makeStyles } from '@mui/styles';
 
-const modalStyle = {
-  outline: 'none',
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '50%',
-  bgcolor: 'background.paper',
-  border: '0px solid #000',
-  boxShadow: 24,
-  p: 1,
-  height: '80%',
-};
-
-let timer;
-const timeout = 500;
-let isModalClosed = false;
+const useStyles = makeStyles((theme) => ({
+  modalBox: {
+    outline: 'none',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: '50%',
+    backgroundColor: theme.palette.background.paper,
+    border: '0px solid #000',
+    boxShadow: theme.shadows[24],
+    padding: theme.spacing(1),
+    height: '80%',
+  },
+}));
 
 const CardModal = (props) => {
+  const classes = useStyles();
   const boardId = props.boardId;
-  const [card, setCard] = useState(props.card);
+  const [card, setCard] = useState(props.card || {});
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const editorWrapperRef = useRef();
+  let timer;
 
   useEffect(() => {
-    setCard(props.card);
-    setTitle(props.card !== undefined ? props.card.title : '');
-    setContent(props.card !== undefined ? props.card.content : '');
-    if (props.card !== undefined) {
-      isModalClosed = false;
-      updateEditorHeight();
-    }
+    setCard(props.card || {});
+    setTitle(props.card?.title || '');
+    setContent(props.card?.content || '');
   }, [props.card]);
 
-  const updateEditorHeight = () => {
-    setTimeout(() => {
-      if (editorWrapperRef.current) {
-        const box = editorWrapperRef.current;
-        box.style.height = (box.offsetHeight - 50) + 'px';
-      }
-    }, timeout);
-  };
-
   const onClose = () => {
-    isModalClosed = true;
-    props.onUpdate(card);
     props.onClose();
   };
 
- // Delete card function
-const deleteCard = async () => {
-  try {
-    await cardApi.delete(boardId, card.id);
-    props.onDelete(card);
-    onClose(); // Close the modal after deletion
-  } catch (error) {
-    alert('Error deleting card');
-  }
-}
-  // Update title function
+  const deleteCard = async () => {
+    try {
+      await cardApi.delete(boardId, card.id);
+      props.onDelete(card);
+      onClose();
+    } catch (error) {
+      console.error('Error deleting card:', error);
+      // Handle error gracefully
+    }
+  };
+
   const updateTitle = async (e) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
@@ -73,32 +59,32 @@ const deleteCard = async () => {
     timer = setTimeout(async () => {
       try {
         await cardApi.update(boardId, card.id, { title: newTitle });
-        card.title = newTitle;
+        setCard((prevCard) => ({ ...prevCard, title: newTitle }));
         props.onUpdate(card);
       } catch (error) {
-        alert('Error updating card title');
+        console.error('Error updating card title:', error);
+        // Handle error gracefully
       }
-    }, timeout);
+    }, 500); 
   };
   
   const updateContent = (e) => {
     const data = e.target.value;
     setContent(data);
-    // Update the card content in local state
-    card.content = data;
+    setCard((prevCard) => ({ ...prevCard, content: data }));
     props.onUpdate(card);
   };
 
   return (
     <Modal
-      open={card !== undefined}
+      open={!!card.id}
       onClose={onClose}
       closeAfterTransition
       BackdropComponent={Backdrop}
       BackdropProps={{ timeout: 500 }}
     >
-      <Fade in={card !== undefined}>
-        <Box sx={modalStyle}>
+      <Fade in={!!card.id}>
+        <Box className={classes.modalBox}>
           <Box sx={{
             display: 'flex',
             alignItems: 'center',
@@ -130,7 +116,7 @@ const deleteCard = async () => {
               }}
             />
             <Typography variant='body2' fontWeight='700'>
-              {card !== undefined ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
+              {card ? Moment(card.createdAt).format('YYYY-MM-DD') : ''}
             </Typography>
             <Divider sx={{ margin: '1.5rem 0' }} />
             <Box
@@ -159,6 +145,5 @@ const deleteCard = async () => {
     </Modal>
   );
 };
-
 
 export default CardModal;
