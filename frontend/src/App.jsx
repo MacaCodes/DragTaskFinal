@@ -5,11 +5,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Home from './pages/Home';
 import Board from './pages/Board';
-import logo from './logo.png'; // 
 
 function App() {
   const theme = createTheme({
-    palette: { mode: 'dark' },
+    palette: { mode: 'light' },
   });
 
   return (
@@ -18,8 +17,6 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<AppLayout />}>
-            {/* Rendering the PNG logo */}
-            <img src={logo} alt="Logo" style={{ width: 100, height: 100 }} />
             <Route index element={<Home />} />
             <Route path="boards" element={<Home />} />
             <Route path="boards/:boardId" element={<Board />} />
