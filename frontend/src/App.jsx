@@ -1,11 +1,11 @@
 import React from 'react';
-import { ReactComponent as Logo } from './logo.svg';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Home from './pages/Home';
 import Board from './pages/Board';
+import logo from './logo.png'; // Importing the PNG logo
 
 function App() {
   const theme = createTheme({
@@ -17,17 +17,12 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path='/' element={<div>
-            <header>
-              <div className="logo-container">
-                <Logo />
-              </div>
-            </header>
-            <AppLayout />
-          </div>}>
+          <Route path="/" element={<AppLayout />}>
+            {/* Rendering the PNG logo */}
+            <img src={logo} alt="Logo" style={{ width: 100, height: 100 }} />
             <Route index element={<Home />} />
-            <Route path='boards' element={<Home />} />
-            <Route path='boards/:boardId' element={<Board />} />
+            <Route path="boards" element={<Home />} />
+            <Route path="boards/:boardId" element={<Board />} />
           </Route>
         </Routes>
       </BrowserRouter>
