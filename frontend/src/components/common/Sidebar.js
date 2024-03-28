@@ -16,16 +16,20 @@ const Sidebar = () => {
     const sidebarWidth = 300;
 
     useEffect(() => {
-        const getBoards = async () => {
-            try {
-                const res = await boardApi.getAll();
-                dispatch(setBoard(res));
-            } catch (err) {
-                alert(err);
+        if (board) {
+            // Check if board is an array before performing array operations
+            if (Array.isArray(board)) {
+                const activeItem = board.findIndex((e) => e._id === boardId);
+                if (board.length > 0 && boardId === undefined) {
+                    navigate(`/boards/${board[0]._id}`);
+                }
+                setActiveIndex(activeItem);
+            } else {
+                // Handle the case where board is not an array
+                console.error('Board data is not in the expected format:', board);
             }
-        };
-        getBoards();
-    }, [dispatch]);
+        }
+    }, [board, boardId, navigate, dispatch]);
 
     useEffect(() => {
         if (board) {
