@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Box, Drawer, IconButton, List, ListItem, ListItemButton, Typography } from '@mui/material';
+import { Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Typography, Divider } from '@mui/material';
 import AddBoxOutlinedIcon from '@mui/icons-material/AddBoxOutlined';
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import boardApi from '../../api/boardApi';
 import { setBoard } from '../../redux/features/boardSlice';
+import { colors, logoSize } from '../../styles';
+import assets from '../../assets/';
+
 
 const Sidebar = () => {
     const board = useSelector((state) => state.board.value);
@@ -13,23 +17,19 @@ const Sidebar = () => {
     const dispatch = useDispatch();
     const { boardId } = useParams();
     const [activeIndex, setActiveIndex] = useState(0);
-    const sidebarWidth = 300;
+    const sidebarWidth = 200;
 
     useEffect(() => {
-        if (board) {
-            // Check if board is an array before performing array operations
-            if (Array.isArray(board)) {
-                const activeItem = board.findIndex((e) => e._id === boardId);
-                if (board.length > 0 && boardId === undefined) {
-                    navigate(`/boards/${board[0]._id}`);
-                }
-                setActiveIndex(activeItem);
-            } else {
-                // Handle the case where board is not an array
-                console.error('Board data is not in the expected format:', board);
+        const getBoards = async () => {
+            try {
+                const res = await boardApi.getAll();
+                dispatch(setBoard(res));
+            } catch (err) {
+                alert(err);
             }
-        }
-    }, [board, boardId, navigate, dispatch]);
+        };
+        getBoards();
+    }, [dispatch]);
 
     useEffect(() => {
         if (board) {
@@ -41,22 +41,22 @@ const Sidebar = () => {
         }
     }, [board, boardId, navigate, dispatch]);
 
-
     const onDragEnd = async ({ source, destination }) => {
-        const newList = [...board]
-        const [removed] = newList.splice(source.index, 1)
-        newList.splice(destination.index, 0, removed)
+        if (!destination) return;
+        const newList = [...board];
+        const [removed] = newList.splice(source.index, 1);
+        newList.splice(destination.index, 0, removed);
 
-        const activeItem = newList.findIndex(e => e.id === boardId)
-        setActiveIndex(activeItem)
-        dispatch(setBoard(newList))
+        const activeItem = newList.findIndex((e) => e._id === boardId);
+        setActiveIndex(activeItem);
+        dispatch(setBoard(newList));
 
         try {
-            await boardApi.updatePosition({ boards: newList })
+            await boardApi.updatePosition({ boards: newList });
         } catch (err) {
-            alert(err)
+            alert(err);
         }
-    }
+    };
 
     const addBoard = async () => {
         try {
@@ -84,17 +84,40 @@ const Sidebar = () => {
             sx={{
                 width: sidebarWidth,
                 height: '100vh',
-                '& > div': { borderRight: 'none' },
+                '& > div': { borderRight: 'none', backgroundColor: colors.background },
             }}
         >
-            <List
-                disablePadding
-                sx={{
-                    width: sidebarWidth,
-                    height: '100vh',
-                    backgroundColor: '#fff', // Replace with the desired background color
-                }}
-            >
+            <List disablePadding>
+                <ListItem>
+                    <Box
+                        sx={{
+                            width: '100%',
+                            display: 'fixed',
+                            alignItems: 'center',
+                            padding: '16px',
+                            backgroundColor: colors.primary,
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <img src={assets.logo} style={logoSize} alt='app logo' />
+                            <Typography variant="h5" fontWeight="700">
+                            Kanny Boards
+                        </Typography>
+                        </Box>
+                        <IconButton onClick={addBoard}>
+                            <AddBoxOutlinedIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
+                </ListItem>
+                <Divider />
+                <Box sx={{ paddingTop: '10px' }} />
+                <ListItem button component={Link} to="/boards">
+                    <ListItemIcon>
+                        <DashboardIcon />
+                    </ListItemIcon>
+                    <ListItemText primary="Dashboard" />
+                </ListItem>
+                <Box sx={{ paddingTop: '10px' }} />
                 <ListItem>
                     <Box
                         sx={{
@@ -107,9 +130,6 @@ const Sidebar = () => {
                         <Typography variant="body2" fontWeight="700">
                             All Boards
                         </Typography>
-                        <IconButton onClick={addBoard}>
-                            <AddBoxOutlinedIcon fontSize="small" />
-                        </IconButton>
                     </Box>
                 </ListItem>
                 <DragDropContext onDragEnd={onDragEnd}>
@@ -131,17 +151,17 @@ const Sidebar = () => {
                                                     cursor: snapshot.isDragging ? 'grab' : 'pointer!important',
                                                 }}
                                             >
-                                                <Typography
-                                                    variant="body2"
-                                                    fontWeight="700"
-                                                    sx={{
+                                                <ListItemText
+                                                    primary={item.icon ? `${item.icon} ${item.title}` : item.title}
+                                                    primaryTypographyProps={{
+                                                        fontSize: '14px',
+                                                        fontWeight: 'medium',
+                                                        letterSpacing: 0,
                                                         whiteSpace: 'nowrap',
                                                         overflow: 'hidden',
                                                         textOverflow: 'ellipsis',
                                                     }}
-                                                >
-                                                    {item.icon} {item.title}
-                                                </Typography>
+                                                />
                                             </ListItemButton>
                                         )}
                                     </Draggable>
