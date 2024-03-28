@@ -1,37 +1,20 @@
-import { Box } from "@mui/material"
-import LoadingButton from '@mui/lab/LoadingButton'
-import { useDispatch } from "react-redux"
-import { setBoard } from "../redux/features/boardSlice"
+import { Box, Typography, Button } from "@mui/material"
 import { useNavigate } from "react-router-dom"
-import boardApi from "../api/boardApi"
-import { useState } from "react"
+
 
 const Home = () => {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate();
 
-  
-  const createBoard = async () => {
-    setLoading(true)
-    try {
-      const { data: board } = await boardApi.create(); 
-      dispatch(setBoard([...board, board]));
-      navigate(`/boards/${board._id}`); 
-    } catch (err) {
-      alert(err)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const handleWelcomeClick = () => {
+    navigate("/");
+  };
+
   return (
     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <LoadingButton variant='outlined' color='success' onClick={createBoard} loading={loading}>
-        Click here to create your first board
-      </LoadingButton>
+      <Button variant='outlined' color='success' onClick={handleWelcomeClick}>
+        Welcome to Kanny Banny! Can't handle the workload? Come we Kanny!
+      </Button>
     </Box>
   );
 };
-
-
 export default Home
