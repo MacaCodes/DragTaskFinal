@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Backdrop, Box, Button, Divider, Fade, IconButton, Modal, TextField, Typography } from '@mui/material';
 import DeleteOutlinedIcon from '@mui/icons-material/DeleteOutlined';
 import Moment from 'moment';
-import { CKEditor } from '@ckeditor/ckeditor5-react';
-import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import cardApi from '../../api/cardApi';
 
 const modalStyle = {
@@ -33,11 +31,9 @@ const CardModal = ({ boardId, card, onClose, onUpdate, onDelete }) => {
 
   const deleteCard = async () => {
     try {
-      if (card && card.id) { // Null check
-        await cardApi.delete(boardId, card.id);
-        onDelete(card);
-        onClose();
-      }
+      await cardApi.delete(boardId, card.id);
+      onDelete(card);
+      onClose();
     } catch (error) {
       console.error('Error deleting card:', error);
       alert('Error deleting card');
@@ -46,12 +42,10 @@ const CardModal = ({ boardId, card, onClose, onUpdate, onDelete }) => {
 
   const handleUpdate = async () => {
     try {
-      if (card && card.id) { // Null check
-        const updatedCard = { ...card, title, content };
-        await cardApi.update(boardId, card.id, updatedCard);
-        onUpdate(updatedCard);
-        onClose();
-      }
+      const updatedCard = { ...card, title, content };
+      await cardApi.update(boardId, card.id, updatedCard);
+      onUpdate(updatedCard);
+      onClose();
     } catch (error) {
       console.error('Error updating card:', error);
       alert('Error updating card');
@@ -61,8 +55,8 @@ const CardModal = ({ boardId, card, onClose, onUpdate, onDelete }) => {
   const updateTitle = (e) => {
     const newTitle = e.target.value;
     setTitle(newTitle);
-    clearTimeout(timer);
-    timer = setTimeout(() => {
+    clearTimeout(window.titleTimer);
+    window.titleTimer = setTimeout(() => {
       handleUpdate();
     }, timeout);
   };
