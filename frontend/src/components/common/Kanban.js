@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -7,7 +8,6 @@ import {
   IconButton,
   Card,
 } from "@mui/material";
-import { useEffect, useState } from "react";
 import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
@@ -15,120 +15,103 @@ import listApi from "../../api/listApi";
 import cardApi from "../../api/cardApi";
 import CardModal from "./CardModal";
 
-let timer;
-const timeout = 500;
-
 const Kanban = (props) => {
   const boardId = props.boardId;
-  const [data, setData] = useState([]);
+  const [lists, setLists] = useState([]);
   const [selectedCard, setSelectedCard] = useState(undefined);
 
   useEffect(() => {
-    setData(props.data);
+    setLists(props.data);
   }, [props.data]);
 
   const onDragEnd = async ({ source, destination }) => {
     if (!destination) return;
-    const sourceColIndex = data.findIndex((e) => e.id === source.droppableId);
-    const destinationColIndex = data.findIndex(
-      (e) => e.id === destination.droppableId
+    const newLists = [...lists];
+    const sourceList = newLists.find((list) => list.id === source.droppableId);
+    const destinationList = newLists.find(
+      (list) => list.id === destination.droppableId
     );
-    const sourceCol = data[sourceColIndex];
-    const destinationCol = data[destinationColIndex];
 
-    const sourceListId = sourceCol.id;
-    const destinationListId = destinationCol.id;
-
-    const sourceCards = [...sourceCol.cards];
-    const destinationCards = [...destinationCol.cards];
-
-    if (source.droppableId !== destination.droppableId) {
-      const [removed] = sourceCards.splice(source.index, 1);
-      destinationCards.splice(destination.index, 0, removed);
-      data[sourceColIndex].cards = sourceCards;
-      data[destinationColIndex].cards = destinationCards;
-    } else {
-      const [removed] = destinationCards.splice(source.index, 1);
-      destinationCards.splice(destination.index, 0, removed);
-      data[destinationColIndex].cards = destinationCards;
-    }
+    const [removed] = sourceList.cards.splice(source.index, 1);
+    destinationList.cards.splice(destination.index, 0, removed);
 
     try {
       await cardApi.updatePosition(boardId, {
-        resourceList: sourceCards,
-        destinationList: destinationCards,
-        resourceListId: sourceListId,
-        destinationListId: destinationListId,
+        sourceListId: source.droppableId,
+        destinationListId: destination.droppableId,
+        sourceCards: sourceList.cards,
+        destinationCards: destinationList.cards,
       });
-      setData(data);
-    } catch (err) {
-      alert(err);
+      setLists(newLists);
+    } catch (error) {
+      console.error("Error updating card position:", error);
     }
   };
 
   const createList = async () => {
     try {
-      const list = await listApi.create(boardId);
-      setData([...data, list]);
-    } catch (err) {
-      alert(err);
+      const newList = await listApi.create(boardId);
+      setLists([...lists, newList]);
+    } catch (error) {
+      console.error("Error creating list:", error);
     }
   };
 
   const deleteList = async (listId) => {
     try {
       await listApi.delete(boardId, listId);
-      const newData = [...data].filter((e) => e.id !== listId);
-      setData(newData);
-    } catch (err) {
-      alert(err);
+      setLists(lists.filter((list) => list.id !== listId));
+    } catch (error) {
+      console.error("Error deleting list:", error);
     }
   };
 
-  const updateListTitle = async (e, listId) => {
-    clearTimeout(timer);
-    const newTitle = e.target.value;
-    const newData = [...data];
-    const index = newData.findIndex((e) => e.id === listId);
-    newData[index].title = newTitle;
-    setData(newData);
-    timer = setTimeout(async () => {
-      try {
-        await listApi.update(boardId, listId, { title: newTitle });
-      } catch (err) {
-        alert(err);
-      }
-    }, timeout);
+  const updateListTitle = async (listId, newTitle) => {
+    try {
+      await listApi.update(boardId, listId, { title: newTitle });
+      setLists(
+        lists.map((list) =>
+          list.id === listId ? { ...list, title: newTitle } : list
+        )
+      );
+    } catch (error) {
+      console.error("Error updating list title:", error);
+    }
   };
 
   const createCard = async (listId) => {
     try {
-      const card = await cardApi.create(boardId, { listId });
-      const newData = [...data];
-      const index = newData.findIndex(e => e.id === listId);
-      newData[index].cards.unshift(card);
-      setData(newData);
-    } catch (err) {
-      alert(err);
+      const newCard = await cardApi.create(boardId, { listId });
+      setLists(
+        lists.map((list) =>
+          list.id === listId
+            ? { ...list, cards: [newCard, ...list.cards] }
+            : list
+        )
+      );
+    } catch (error) {
+      console.error("Error creating card:", error);
     }
   };
 
-  const onUpdateCard = (card) => {
-    const newData = [...data];
-    const listIndex = newData.findIndex(e => e.id === card.id);
-    const cardIndex = newData[listIndex].cards.findIndex(e => e.id === card.id)
-    newData[listIndex].cards[cardIndex] = card
-    setData(newData)
-  }
-
-  const onDeleteCard = (card) => {
-    const newData = [...data];
-    const listIndex = newData.findIndex(e => e.id === card.id);
-    const cardIndex = newData[listIndex].cards.findIndex(
-      (e) => e.id === card.id
+  const onUpdateCard = (updatedCard) => {
+    setLists(
+      lists.map((list) => ({
+        ...list,
+        cards: list.cards.map((card) =>
+          card.id === updatedCard.id ? updatedCard : card
+        ),
+      }))
     );
-    newData[listIndex].cards.splice(cardIndex, 1);
-    setData(newData);
+  };
+
+  const onDeleteCard = (deletedCard) => {
+    setLists(
+      lists.map((list) => ({
+        ...list,
+        cards: list.cards.filter((card) => card.id !== deletedCard.id),
+      }))
+    );
   };
 
   return (
@@ -142,7 +125,7 @@ const Kanban = (props) => {
       >
         <Button onClick={createList}>Add list</Button>
         <Typography variant="body2" fontWeight="700">
-          {data.length} Lists
+          {lists.length} Lists
         </Typography>
       </Box>
       <Divider sx={{ margin: "10px 0" }} />
@@ -155,9 +138,9 @@ const Kanban = (props) => {
             overflowX: "auto",
           }}
         >
-          {data.map((list) => (
+          {lists.map((list) => (
             <div key={list.id} style={{ width: "300px" }}>
-              <Droppable key={list.id} droppableId={list.id}>
+              <Droppable droppableId={list.id}>
                 {(provided) => (
                   <Box
                     ref={provided.innerRef}
@@ -178,7 +161,9 @@ const Kanban = (props) => {
                     >
                       <TextField
                         value={list.title}
-                        onChange={(e) => updateListTitle(e, list.id)}
+                        onChange={(e) =>
+                          updateListTitle(list.id, e.target.value)
+                        }
                         placeholder="Untitled"
                         variant="outlined"
                         sx={{
@@ -216,30 +201,24 @@ const Kanban = (props) => {
                         <DeleteOutlinedIcon />
                       </IconButton>
                     </Box>
-                    {/* Cards */}
                     {list.cards.map((card, index) => (
                       <Draggable
                         key={card.id}
                         draggableId={card.id}
                         index={index}
                       >
-                        {(provided, snapshot) => (
+                        {(provided) => (
                           <Card
                             ref={provided.innerRef}
                             {...provided.draggableProps}
                             {...provided.dragHandleProps}
                             sx={{
-                              padding: "10px",
                               marginBottom: "10px",
-                              cursor: snapshot.isDragging
-                                ? "grab"
-                                : "pointer!important",
+                              cursor: "pointer",
                             }}
                             onClick={() => setSelectedCard(card)}
                           >
-                            <Typography>
-                              {card.title === "" ? "Untitled" : card.title}
-                            </Typography>
+                            <Box sx={{ padding: "10px" }}>{card.title}</Box>
                           </Card>
                         )}
                       </Draggable>
@@ -252,13 +231,14 @@ const Kanban = (props) => {
           ))}
         </Box>
       </DragDropContext>
-      <CardModal
-        card={selectedCard}
-        boardId={boardId}
-        onClose={() => setSelectedCard(undefined)}
-        onUpdate={onUpdateCard}
-        onDelete={onDeleteCard}
-      />
+      {selectedCard && (
+        <CardModal
+          card={selectedCard}
+          onClose={() => setSelectedCard(undefined)}
+          onUpdate={onUpdateCard}
+          onDelete={onDeleteCard}
+        />
+      )}
     </>
   );
 };
