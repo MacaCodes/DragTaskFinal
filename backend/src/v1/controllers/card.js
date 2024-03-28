@@ -2,7 +2,7 @@ const Card = require('../models/card')
 const List = require('../models/list')
 
 exports.create = async (req, res) => {
-  const { listId } = req.params;
+  const { listId } = req.body;
   try {
     const list = await List.findById(listId);
     const cardCount = await Card.find({ list: listId }).countDocuments();
@@ -20,7 +20,7 @@ exports.create = async (req, res) => {
 
 //get card
 exports.getOne = async (req, res) => {
-  const { cardId } = req.params;
+  const { cardId } = req.body;
   
   try {
       const card = await Card.findById(cardId);
@@ -33,7 +33,7 @@ exports.getOne = async (req, res) => {
 
 //get all
 exports.getAll = async (req, res) => {
-  const { listId } = req.params;
+  const { listId } = req.body;
   
   try {
       const cards = await Card.find({ list: listId }).sort('position');
@@ -45,7 +45,7 @@ exports.getAll = async (req, res) => {
 
 // Update Card
 exports.update = async (req, res) => {
-  const { cardId } = req.params;
+  const { cardId } = req.body;
   try {
     const card = await Card.findByIdAndUpdate(
       cardId,
@@ -101,7 +101,7 @@ exports.updatePosition = async (req, res) => {
   }
 
 exports.delete = async (req, res) => {
-  const { cardId } = req.params;
+  const { cardId } = req.body;
   try {
     const currentCard = await Card.findById(cardId);
     await Card.deleteOne({ _id: cardId });
