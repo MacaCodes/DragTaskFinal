@@ -13,7 +13,7 @@ import axiosClient from './axiosClient';
 
 const boardApi = {
   create: (board) => axiosClient.post('/boards', board),
-  getAll: (params) => axiosClient.get('/boards', { params }),
+  getAll: () => axiosClient.get('/boards'),
   updatePosition: (boardId, params) => axiosClient.put(`/boards/${boardId}/position`, params),
   getOne: (boardId) => axiosClient.get(`/boards/${boardId}`),
   delete: (boardId) => axiosClient.delete(`/boards/${boardId}`),
