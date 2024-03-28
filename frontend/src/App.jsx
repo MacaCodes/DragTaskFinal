@@ -5,7 +5,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/layout/AppLayout';
 import Home from './pages/Home';
 import Board from './pages/Board';
-import logo from './logo.png'; // Importing the PNG logo
+import logo from './logo.png'; // 
 
 function App() {
   const theme = createTheme({
