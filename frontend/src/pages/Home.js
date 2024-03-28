@@ -12,7 +12,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false)
 
   
-  const createBoard = async () => {
+  const getBoard = async () => {
     setLoading(true)
     try {
       const { data: board } = await boardApi.create(); 
@@ -26,8 +26,8 @@ const Home = () => {
   }
   return (
     <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <LoadingButton variant='outlined' color='success' onClick={createBoard} loading={loading}>
-        Click here to create your first board
+      <LoadingButton variant='outlined' color='success' onClick={getBoard} loading={loading}>
+      Welcome to Kanny Banny! Can't handle the workload? Come we Kanny!
       </LoadingButton>
     </Box>
   );
@@ -35,3 +35,4 @@ const Home = () => {
 
 
 export default Home
+
